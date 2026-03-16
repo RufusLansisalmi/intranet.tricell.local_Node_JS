@@ -1,0 +1,213 @@
+body
+{
+    background-color: #ffffff;
+     font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 12px;
+    color: #000000;
+}
+a:link { color: #ffffff; text-decoration: none;}
+a:active { color: #aad037; text-decoration: none;}
+a:visited { color: #ffffff; text-decoration: none;}
+a:hover { color: #aad037; text-decoration: none;}
+
+table
+{
+  border: 0;
+  border-collapse: collapse;
+  border-spacing: 0;
+  padding: 0;
+}
+td{
+    padding: 0;
+}
+#headerlogo
+{
+	margin-top: 30px;
+}
+#headercontainer
+{
+	position: relative;
+	display: block;
+	height: 130px;
+	margin-bottom: 30px;
+}
+#headerleft, #headermiddle, #headerright
+{
+	position: relative;
+	float: left;
+}
+#headerleft
+{
+	margin-left: 50px;
+	height: 130px;
+	width: 293px; 
+}
+#headermiddle
+{
+	margin-left: 60px;
+	height: 130px;
+	width: 270px; 
+}
+#headerright
+{
+	margin-left: 30px;
+	height: 130px;
+	width: 180px; 
+}
+td.socialicon
+{
+    height: 130px;
+    width:  130px;
+    text-align: center;
+    vertical-align: bottom;
+}
+.contacttext
+{
+    font-size: 12px;
+    color: #124278;
+    font-weight: bold;
+}
+.contactheading
+{
+	font-size: 11px;
+	color: #124278;
+	font-weight: bold;
+}
+td.contactinfo
+{
+    font-size: 12px;
+    height: 26px;
+    text-align: left;
+    vertical-align: middle;
+    color: #124278;
+}
+td.contacticon
+{
+    height: 26px;
+    width: 26px;
+    text-align: left;
+    vertical-align: middle;
+}
+#mainmenu
+{
+   
+   height: 30px;
+   margin-left: 111px;
+   border: 1px solid #000000;
+   background-color: #274f26;
+   padding: 0;
+   text-align: center;
+   position: relative;
+   float: left;
+}
+#mainmenuback	/* menyn med Back-knappen */
+{
+	width: 788px;
+	height: 30px;
+	margin-left: 80px;
+	border: 1px solid;
+	border-color: #000000;
+	background-color: #274f26;
+	padding: 0px;
+	text-align: center;
+}
+.menuitem{
+   
+    position: relative;
+    float: left;
+    background-color: #274f26;
+    
+}
+td.mainmenuicon{
+    width: 34px;
+    height: 30px;
+    text-align: center;
+    vertical-align: middle;
+}
+td.mainmenutext{
+   
+    height: 30px;
+    text-align: left;
+    vertical-align: middle;
+    font-size: 14px;
+   font-weight: bold;
+    padding-right: 30px;
+    a:visited { color: #ffffff; text-decoration: none;}
+}
+td.mainmenudivider{
+    width: 1px;
+    height: 30px;
+    background-color: #ffffff;
+}
+.menuitem:hover .menudropitem
+{
+	display: block;
+}
+.menudropitem
+{
+	display: none;
+	position: absolute;
+	z-index: 1;
+}
+td.mainmenudroptext
+{
+	height: 30px;
+	min-width: 180px;
+	text-align: left;
+	vertical-align: middle;
+	background-color: #aad037;
+	border: 1px solid;
+	border-color: #000000;
+	padding-left: 15px;
+}
+#infotable
+{
+	width: 758px;
+	margin-left: 110px;
+	border: 1px solid;
+	border-color: #000000;
+	background-image: url("../images/tablebg.gif");
+	margin-bottom: 20px;
+}
+.infodiv
+{
+	width: 718px;
+	margin-left: 110px;
+	border: 1px solid;
+	border-color: #000000;
+	background-image: url("../images/tablebg.gif");
+	margin-bottom: 20px;
+	padding: 20px;
+	text-align: left;
+	vertical-align: top;
+	font-size: 14px;
+}
+.infotablecell
+{
+    padding: 20px;
+    text-align: left;
+    vertical-align: top;
+}
+.infodiv
+{
+	width: 718px;
+	margin-left: 110px;
+	border: 1px solid;
+	border-color: #000000;
+	background-image: url("../images/tablebg.gif");
+	margin-bottom: 20px;
+	padding: 20px;
+	text-align: left;
+	vertical-align: top;
+	font-size: 14px;
+}
+h1{
+    font-size: 16px;
+    font-weight: bold;
+}
+h2{
+    font-size: 16px;
+    font-weight: normal;
+    font-style: italic;
+}
+

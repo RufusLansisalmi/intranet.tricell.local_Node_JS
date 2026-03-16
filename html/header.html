@@ -1,0 +1,174 @@
+<!-- left menu start-->
+
+<div id="leftsidebar" class="sidebar">
+<a href="javascript:void(0)" class="closemenubutton" onclick="closeMenu()">X</a>
+<b><a href="company_presentation.html">Company Presentation</a></b>
+<b><a href=".html">Pharmaceutical Research</a></b>
+<b><a href=".html">Natural Resources</a></b>
+<b><a href=".html">Shipping</a></b>
+</p>
+<b><a href="history.html">History</a></b>
+</p>
+<b><a href=".html">Headquarters</a></b>
+<b><a href=".html">Board of Directors</a></b>
+<b><a href=".html">International Suppliers</a></b>
+<b><a href=".html">Kijuju Laboratory</a></b>
+<b><a href="researchdatabase.html">Research Database</a></b>
+</p>
+<b><a href="http://localhost:3000/api/personnelregistry/">Personnel Registry</a></b>
+
+</div>
+
+
+<!-- left menu slut-->
+
+
+<!------ Header start ------>
+
+<!-- Sitemap start-->
+<div id="menubuttoncontainer">
+  <button class="openmenubutton" onclick="openMenu()">Sitemap</button>
+
+</div>
+
+
+<!-- Sitemap slut-->
+
+
+ <!-- Header container start -->
+
+<div id="headercontainer">
+    <!-- Container left start -->
+    <div id="headerleft">
+  <img id="headerlogo" src="images/logo.gif" alt="Tricell Laboratories" />
+    </div>
+    
+      <!-- Container left slut -->
+
+
+      <!-- Container middle start -->
+<div id="headermiddle">
+        <!-- Inre tabell Social Icons Start -->
+     <table>
+        <tr>
+            <td class="socialicon"><a href="http://www.facebook.com"><img src="images/social_fb.gif" alt="Facebook"> </a></td>
+            <td class="socialicon"><a href="http://www.instagram.com"><img src="images/social_insta.gif" alt="Instagram"></a> </td>
+            <td class="socialicon"><a href="http://www.pinterest.com"><img src="images/social_pin.gif" alt="Pinterest"></a> </td>
+            <td class="socialicon"><a href="http://www.snapchat.com"><img src="images/social_snap.gif" alt="Snapchat"> </a></td>
+            <td class="socialicon"><a href="http://www.twitter.com"><img src="images/social_twitter.gif" alt="Twitter"> </a></td>
+            <td class="socialicon"><a href="http://www.youtube.com"><img src="images/social_youtube.gif" alt="Youtube"> </a></td>
+           
+        </tr>
+
+     </table>
+
+    <!-- Inre tabell Social Icons Slut -->
+    </div>
+    
+      <!-- Container middle slut -->
+
+      <!-- Container right start -->
+<div id="headerright">
+       <!-- Inre tabell Kontakt Start -->
+     <table>
+	 <tr>
+	  <td colspan="2" height="20" valign="top" align="center"><font class="contactheading">TRICELL LABORATORIES</font><td>
+	 </tr>
+	 <tr>
+	  <td class="contacticon"><img src="images/contact_phone.gif" alt="Phone"/></td>
+	  <td class="contactinfo">+324 (555)-541 236</td>
+	 </tr>
+	 <tr>
+	  <td class="contacticon"><img src="images/contact_fax.gif" alt="Fax"/></td>
+	  <td class="contactinfo">+324 (555)-543 626</td>
+	 </tr>
+	 <tr>
+	  <td class="contacticon"><img src="images/contact_mail.gif" alt="Mail"/></td>
+	  <td class="contactinfo">office@tricell.com</td>
+	 </tr>
+	 <tr>
+	  <td class="contacticon"><img src="images/contact_web.gif" alt="Web" /></td>
+	  <td class="contactinfo">www.tricell.com</td>
+	 </tr>
+	</table>
+	<!-- Kontaktuppgifter slut -->
+    </div>
+    
+      <!-- Container right slut -->
+
+
+</div>
+<!-- Header container slut -->
+
+<div style="clear: both;"></div>
+  
+ 
+<!------------------------- Header slut ------------------------------>
+<button id="chatToggle" style="
+  position: fixed;
+  bottom: 20px;
+  right: 20px;
+  padding: 10px 15px;
+  background: #222;
+  color: white;
+  border: none;
+  cursor: pointer;
+">
+  Chat <span id="chatBadge" style="
+    background:red;
+    color:white;
+    padding:2px 6px;
+    border-radius:50%;
+    font-size:12px;
+    display:none;
+  ">0</span>
+</button>
+
+<div id="chatContainer" style="
+  display:none;
+  position:fixed;
+  bottom:70px;
+  right:20px;
+  width:400px;
+  height:500px;
+  background:white;
+  border:1px solid #ccc;
+">
+  <iframe src="/chat" width="100%" height="100%" style="border:none;"></iframe>
+</div>
+
+<script>
+const btn = document.getElementById("chatToggle");
+const chat = document.getElementById("chatContainer");
+
+btn.addEventListener("click", () => {
+  if (chat.style.display === "none") {
+    chat.style.display = "block";
+  } else {
+    chat.style.display = "none";
+  }
+});
+
+// ===== AJAX new message check =====
+
+function checkNewMessages() {
+  fetch('/api/getchat')
+    .then(res => res.text())
+    .then(count => {
+
+      const badge = document.getElementById("chatBadge");
+
+      if (parseInt(count) > 0) {
+        badge.innerText = count;
+        badge.style.display = "inline";
+      } else {
+        badge.style.display = "none";
+      }
+
+    });
+}
+
+checkNewMessages();
+setInterval(checkNewMessages, 3000);
+
+</script>
