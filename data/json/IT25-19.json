@@ -1,0 +1,19 @@
+{
+  "fields": {
+    "Dateofbirth": "10.9.1981",
+    "Name\n": "Sergei Dragunov",
+    "Sex\n": "M",
+    "Height\n": "192cm",
+    "Weight\n": "98kg",
+    "Bloodtype": "B",
+    "Rank\n": "Junior Data Analyst",
+    "Securitylevel": "C",
+    "Signature\n": "Dragunov",
+    "Date\n": "08.21.2025",
+    "Employeecode": "IT2519",
+    "Department\n": "Medical Data Department",
+    "Background\n": "Dragunov is a member of an elite special operations unit in the Russian military.\nThis role has put him in conflict with parties including the United Nations officers Raven and Master Raven, and earned him the moniker \"The White Angel of Death\".",
+    "Strengths\n": "Dragunov fights using Commando Sambo; a modified offensive style of Sambo used and trained by members of the Russian army to defend one's self in a hand-to-hand combat situation. Sambo as a sport focuses on throwing and submissions whilst restricting chokeholds. \nCommando Sambo differs from the sport variation as users are given the privilege of punching, kicking and the intention of fracturing bones. The punching and kicking motions are derived from Mixed Martial Arts techniques.",
+    "Weaknesses\n": "His reliance on certain moves like D+2 can be exploited, and his approaches, particularly WR+2, are linear and vulnerable to sidestepping. He also lacks strong keepout tools and may struggle with his defensive options due to his strong offensive capabilities."
+  }
+}

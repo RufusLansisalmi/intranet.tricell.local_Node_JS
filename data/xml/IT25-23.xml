@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<fields xmlns:xfdf="http://ns.adobe.com/xfdf-transition/"
+><Dateofbirth xfdf:original="Date of birth"
+>05.08.1966</Dateofbirth
+><Name
+>Darth Revan</Name
+><Sex
+>M</Sex
+><Height
+>1.85</Height
+><Weight
+>87 kg</Weight
+><Bloodtype xfdf:original="Blood type"
+>Unknown</Bloodtype
+><Rank
+>Junior Data Analyst</Rank
+><Securitylevel xfdf:original="Security level"
+>C</Securitylevel
+><Signature
+>Revan</Signature
+><Date
+>21.08.2025</Date
+><Employeecode xfdf:original="Employee code"
+>IT25-23</Employeecode
+><Department
+>Medical Data Department</Department
+><Background
+>Initially a respected Jedi, he defied the Jedi Council by leading a faction of Jedi Knights into the Mandalorian Wars, becoming a celebrated war hero. Driven by a desire to defeat the Mandalorians, he delved into the Unknown Regions and discovered an ancient Sith Empire, ultimately falling to the dark side and becoming Darth Revan.</Background
+><Strengths
+>exceptional mastery of both the light and dark sides of the Force, his strategic brilliance, and his formidable lightsaber combat skills</Strengths
+><Weaknesses
+>Darth Revan's primary weakness was his overconfidence and arrogance.</Weaknesses
+></fields>

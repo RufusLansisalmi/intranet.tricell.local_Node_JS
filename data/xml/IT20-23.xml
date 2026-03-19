@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<fields xmlns:xfdf="http://ns.adobe.com/xfdf-transition/">
+
+<Dateofbirth xfdf:original="Date of birth">15.01.1988</Dateofbirth>
+
+<Name>Deadlift</Name>
+
+<Sex>M</Sex>
+
+<Height>190</Height>
+
+<Weight>197</Weight>
+
+<Bloodtype xfdf:original="Blood type">A+</Bloodtype>
+
+<Rank>Junior Data Analyst</Rank>
+
+<Securitylevel xfdf:original="Security level">C</Securitylevel>
+
+<Signature>THE BEAST</Signature>
+
+<Date>21.10.2025</Date>
+
+<Emloyeecode xfdf:original="Employee code">23</Emloyeecode>
+
+<Department>Medical Data Department</Department>
+
+<Background>Deadlift's background includes a start as a competitive national swimmer, a period working as a truck mechanic, and an eventual transition to becoming a professional strongman after getting into bodybuilding. Born in Newcastle-under-Lyme, England, on January 15, 1988, he was once a high-achieving swimmer who competed at the national level before focusing on strength sports. </Background>
+
+<Strengths>Strength.</Strengths>
+
+<Weaknesses>Icelandic people. </Weaknesses></fields>
