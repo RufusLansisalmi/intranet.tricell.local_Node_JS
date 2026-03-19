@@ -79,7 +79,7 @@ app.use('/api/info', info);
 app.use('/api/login', login);
 app.use('/api/logout', logout);
 app.use('/api/personnelregistry', personnelRegistry);
-app.use('/api/virusdatabase', virusDatabase);
+app.use('/api/virus', virusDatabase)
 app.use('/api/newemployee', newEmployee);
 app.use('/api/editemployee', editEmployee);
 app.use('/api/deleteemployee', deleteEmployee);
