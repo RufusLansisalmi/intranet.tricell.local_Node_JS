@@ -37,7 +37,7 @@ const deletevirus = require('./routes/deletevirus');
  const path = require('path');
 
 const readHTML = require('./readHTML');
-app.use(express.static(__dirname));
+app.use(express.static(path.join(__dirname, 'public')));
 
 
 
@@ -63,7 +63,7 @@ app.get('/', (req, res) =>
     res.write(htmlmenu);
     res.write(htmlinfostart);
 
-    var htmlinfo = readHTML('./public/text/index.html');
+    var htmlinfo = readHTML('./text/index.html');
     res.write(htmlinfo);
 
 
@@ -91,7 +91,16 @@ app.use('/api/deletevirus', deletevirus);
 
 
 
-app.listen(3000, () =>
+const server = app.listen(3000, () =>
 {
     console.log('Server is running on http://localhost:3000');
+});
+
+server.on('error', (err) => {
+    if (err.code === 'EADDRINUSE') {
+        console.error('Error: Port 3000 is already in use. Kill the existing process and try again.');
+    } else {
+        console.error('Server error:', err.message);
+    }
+    process.exit(1);
 });

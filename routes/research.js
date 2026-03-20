@@ -8,7 +8,7 @@ router.get('/', (request, response) =>
 const ADODB = require('node-adodb');
 
 const connection = ADODB.open(
-'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdatabase.mdb;'
+'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb;'
 );
 
 async function sqlQuery()

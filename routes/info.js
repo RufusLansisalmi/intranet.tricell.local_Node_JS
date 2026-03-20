@@ -38,7 +38,7 @@ router.get('/', (req, res) =>
     res.write(htmlmenu);
     res.write(htmlinfostart);
 
-    var htmlinfo = readHTML('./public/text/index.html');
+    var htmlinfo = readHTML('./text/index.html');
     res.write(htmlinfo);
 
     res.write(htmlinfostop);
@@ -73,11 +73,11 @@ router.get('/:infotext', (req, res) =>
     res.write(htmlinfostart);
 
    // var htmlinfo = readHTML('./public/text/index.html');
-   const filepath = path.resolve(__dirname, '..', 'public', 'text', infotext + '.html');
+   const filepath = path.resolve(__dirname, '..', 'text', infotext + '.html');
     if(fs.existsSync(filepath)) {
          htmlinfo = readHTML(filepath);
     } else {
-        htmlinfo = readHTML('./public/text/index.html');
+        htmlinfo = readHTML('./text/index.html');
     }
 
     res.write(htmlinfo);

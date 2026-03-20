@@ -72,7 +72,7 @@ router.post('/:id',(req,res)=>{
 const id = req.params.id;
 
 const connection = ADODB.open(
-'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdatabase.mdb'
+'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb'
 );
 
 async function update(){
