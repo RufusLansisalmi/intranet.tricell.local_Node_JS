@@ -43,7 +43,7 @@ response.send(html);
 
 }
 
-sqlQuery();
+sqlQuery().catch(err => { console.error('research error:', err); if (!response.headersSent) response.status(500).end('Server error'); });
 
 });
 

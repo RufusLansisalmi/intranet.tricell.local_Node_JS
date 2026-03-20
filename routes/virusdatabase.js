@@ -186,7 +186,7 @@ res.end();
 
 }
 
-sqlQuery();
+sqlQuery().catch(err => { console.error('virusdatabase error:', err); if (!res.headersSent) res.status(500).end('Server error'); });
 
 });
 

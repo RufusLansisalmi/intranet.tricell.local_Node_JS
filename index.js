@@ -37,7 +37,7 @@ const deletevirus = require('./routes/deletevirus');
  const path = require('path');
 
 const readHTML = require('./readHTML');
-app.use(express.static('public'));
+app.use(express.static(__dirname));
 
 
 

@@ -8,7 +8,7 @@ router.use(cookieParser());
  const path = require('path');
 
 const readHTML = require('../readHTML');
-router.use(express.static('public'));
+router.use(express.static(__dirname + '/..'));
 
 const pug = require('pug');
 const {response} = require('express');

@@ -20,7 +20,8 @@ var htmlbottom = readHTML('html/bottom.html');
 router.get('/', (req, res) =>
 {
     req.session.destroy();
-    
+
+    res.writeHead(200, {'Content-Type': 'text/html'});
     res.write(htmlhead);
     res.write(htmlheader);
    // if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }

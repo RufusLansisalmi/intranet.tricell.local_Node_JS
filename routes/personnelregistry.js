@@ -5,7 +5,7 @@ const ADODB = require('node-adodb');
 var cookieParser = require('cookie-parser');
 router.use(cookieParser());
 
-router.use(express.static('./public'));
+router.use(express.static(__dirname + '/..'));
 const path = require('path');
 const xml2js = require('xml2js');
 
@@ -104,7 +104,7 @@ htmloutput += '' +
         "";
 
 		try {
-			const result = await connection.query('SELECT id, employeeCode AS employeecode, name, signatureDate AS signaturedate, rank, securitylevel AS securitylevel FROM employee');
+			const result = await connection.query('SELECT id, employeeCode AS employeecode, name, signatureDate AS signaturedate, rank, securitylevel FROM employee');
 			var count = result.length;
 			let i;
 			for (i = 0; i < count; i++) {
@@ -183,7 +183,7 @@ htmloutput += '' +
 
 
 }
-	sqlQuery();
+	sqlQuery().catch(err => { console.error('personnelregistry / error:', err); if (!res.headersSent) res.status(500).end('Server error'); });
     //  res.write(str_employeecode);
   
 });
@@ -357,7 +357,7 @@ if (result && result.length > 0) {
     res.write(htmlbottom);
     res.end();
 	}
-	sqlQuery();
+	sqlQuery().catch(err => { console.error('personnelregistry /:id error:', err); if (!res.headersSent) res.status(500).end('Server error'); });
 
 });
 

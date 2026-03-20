@@ -69,7 +69,7 @@ const result = await connection.execute(`DELETE FROM employee WHERE id = ${id}`)
 
     res.end();
  }
-    sqlQuery();
+    sqlQuery().catch(err => { console.error('deleteemployee error:', err); if (!res.headersSent) res.status(500).end('Server error'); });
 });
 
 

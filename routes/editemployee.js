@@ -91,7 +91,7 @@ router.get('/:id', (req, res) =>
 
     res.end();
     }
-	sqlQuery();
+	sqlQuery().catch(err => { console.error('editemployee GET error:', err); if (!res.headersSent) res.status(500).end('Server error'); });
 
 
 });
@@ -165,7 +165,7 @@ router.post('/', function(request, response)
         response.write(htmlBottom);
         response.end();
     }
-    sqlQuery();
+    sqlQuery().catch(err => { console.error('editemployee POST error:', err); if (!response.headersSent) response.status(500).end('Server error'); });
 });
 
 

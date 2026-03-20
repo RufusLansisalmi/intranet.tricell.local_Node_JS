@@ -4,8 +4,55 @@
   <meta charset="utf-8">
   <meta http-equiv="refresh" content="0;url=../index.html">
   <title>Redirecting…</title>
+
+  <style>
+#loginLayer {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 10;
+    background-color: #98e6b2;
+    width: 250px;
+    padding: 10px;
+    border: #294e13 2px dashed;
+    display: none;
+}
+</style>
+
+<script>
+document.addEventListener("keypress", event => {
+    if (event.key == "t") {
+        document.getElementById("loginLayer").style.display = "block";
+    }
+});
+
+function formCheck() {
+    if (document.form.femployeecode.value == "") {
+        alert("You must give an Employee Code!");
+        return false;
+    }
+    if (document.form.fpassword.value == "") {
+        alert("You must give a Password!");
+        return false;
+    }
+}
+</script>
+
 </head>
 <body>
   Redirecting…
+
+<div id="loginLayer">
+    <h1>Login</h1>
+    <form name="form" action="/api/login" onSubmit="return formCheck()" method="get">
+        Employee Code: <input type="text" name="femployeecode" size="7" maxlength="7" />
+        <p />
+        Password: <input type="password" name="fpassword" size="7" maxlength="7" />
+        <p />
+        <input type="submit" value="Login" /><input type="reset" value="Reset" />
+    </form>
+</div>
+
 </body>
 </html>

@@ -172,7 +172,7 @@ if(files.ffile.originalFilename != "")
         response.write(htmlBottom);
         response.end();
     }
-    sqlQuery();
+    sqlQuery().catch(err => { console.error('newemployee error:', err); if (!response.headersSent) response.status(500).end('Server error'); });
 });
 
   });

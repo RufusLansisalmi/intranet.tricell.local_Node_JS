@@ -34,7 +34,7 @@ router.get('/', (request, response) =>
         // Skicka respons, antalet nya meddelanden
         response.send(newmessages.toString());
     }
-    sqlQuery();         
+    sqlQuery().catch(err => { console.error('getchat error:', err); if (!response.headersSent) response.status(500).end('Server error'); });
 });
 
 module.exports = router;

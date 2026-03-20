@@ -2,65 +2,28 @@
 
 <head>
 <title>Tricell Laboratories Inc</title>
+<base href="/">
 
 <script language="javascript" src="script/leftmenu.js"></script>
 <script language="JavaScript" src="script/MD5.js"></script>
 
-<script language="JavaScript">
-	let keys = {t: false, r: false};
-
-    addEventListener("keydown", (event) => 
-	{
-      if (event.key === "t") 
-	  {
-        keys.t = true;
-      }
-      if (event.key === "r") 
-	  {
-        keys.r = true;
-      }
-	if(keys.t && keys.r)
-	{
-		document.getElementById("loginLayer").style.display = "block";
+<script>
+document.addEventListener("keypress", event => {
+    if (event.key == "t") {
+        document.getElementById("loginLayer").style.display = "block";
     }
-    });
+});
 
-    addEventListener("keyup", (event) => 
-	{
-      if (event.key === "t") {
-        keys.t = false;
-      }
-      if (event.key === "r") {
-        keys.r = false;
-      }
-    });
-
-	document.addEventListener("keydown", event => 
-	{ 
-		if (event.key == "Escape") 
-		{
-			document.getElementById("loginLayer").style.display = "none";
-		}
-	});
-
-	function hashing()
-	{
-		document.form.fpassword.value = hex_md5(document.form.fpassword.value);
-	}
-
-	function formCheck()
-	{
-		if(document.form.femployeecode.value=="")
-		{
-				   alert("You must give an employee code!");
-				return false;
-		}
-		if(document.form.fpassword.value=="")
-		{
-				   alert("You must give a password!");
-				return false;
-		}
-	}
+function formCheck() {
+    if (document.form.femployeecode.value == "") {
+        alert("You must give an Employee Code!");
+        return false;
+    }
+    if (document.form.fpassword.value == "") {
+        alert("You must give a Password!");
+        return false;
+    }
+}
 </script>
 <link rel="stylesheet" href="/css/index.css" type="text/css">
 <link rel="stylesheet" href="/css/leftmenu.css" type="text/css">
@@ -126,15 +89,13 @@
 
 <!---------------------Hidden login-prompt start------------------------->
 <div id="loginLayer">
-	<big><strong>Login to Tricell Laboratories:</strong></big>
-	<form name="form" action="http://localhost:3000/api/login" onSubmit="return formCheck()"  method="get">
-		<p />
-		Employee Code: <input type="text" name="femployeecode" id="femployeecode" size="7" maxlength="7" />
-		<p />
-		Password: <input type="password" name="fpassword" id="fpassword" size="10" maxlength="10" />
-		<p />
-		<input type="submit" class="button" value="Login" onClick="javascript:hashing()" /><input class="button" type="reset" value="Reset Form" />
-		<p />
-	</form>
-</div>  
+    <h1>Login</h1>
+    <form name="form" action="/api/login" onSubmit="return formCheck()" method="get">
+        Employee Code: <input type="text" name="femployeecode" size="7" maxlength="7" />
+        <p />
+        Password: <input type="password" name="fpassword" size="7" maxlength="7" />
+        <p />
+        <input type="submit" value="Login" /><input type="reset" value="Reset" />
+    </form>
+</div>
  
