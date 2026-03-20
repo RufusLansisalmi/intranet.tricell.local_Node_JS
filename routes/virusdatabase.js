@@ -24,6 +24,7 @@ var htmlbottom = readHTML('html/bottom.html');
 router.get('/', (req, res) =>
 {
 
+
 let str_objectNumber, str_objectName, str_objectCreator, str_objectCreatedDate, str_objectStatus;
 
 const connection = ADODB.open(
@@ -135,7 +136,7 @@ var count = result.length;
 for(let i=0;i<count;i++)
 {
 
-id = result[i]['ID'];
+let id = result[i]['ID'];
 
 str_objectNumber = result[i]['objectNumber'];
 str_objectName = result[i]['objectName'];
@@ -146,7 +147,10 @@ str_objectStatus = result[i]['objectStatus'];
 htmloutput +=
 "<tr>"+
 "<td class=\"infolight\">"+str_objectNumber+"</td>"+
-"<td class=\"infodark\">"+str_objectName+"</td>"+
+"<td class=\"infodark\">"+
+"<a href=\"/api/virus/"+encodeURIComponent(str_objectNumber)+"\">"+
+str_objectName+
+"</a></td>"+
 "<td class=\"infolight\">"+str_objectCreator+"</td>"+
 "<td class=\"infolight\">"+str_objectCreatedDate+"</td>"+
 "<td class=\"infolight\">"+str_objectStatus+"</td>";
@@ -188,6 +192,83 @@ res.end();
 
 sqlQuery().catch(err => { console.error('virusdatabase error:', err); if (!res.headersSent) res.status(500).end('Server error'); });
 
+});
+
+router.get('/:id', (req, res) =>
+{
+    const objectNumber = decodeURIComponent(req.params.id);
+
+    const connection = ADODB.open(
+    'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb'
+    );
+
+    async function sqlQuery()
+    {
+        res.write(htmlhead);
+        res.write(htmlheader);
+        res.write(htmlmenu);
+        res.write(htmlinfostart);
+
+        try
+        {
+            const result = await connection.query(`
+                SELECT *
+                FROM ResearchObjects
+                WHERE objectNumber='${objectNumber}'
+            `);
+
+            if(result.length === 0)
+            {
+                res.write("<h1>Object not found</h1>");
+            }
+            else
+            {
+                let v = result[0];
+
+                let htmloutput = `
+                <h2>${v.objectNumber} ${v.objectName}</h2>
+
+                <div style="border:1px solid #333;padding:15px;width:600px;background:#f5f5f5;">
+
+                    <div style="background:#cfe2ff;padding:10px;margin-bottom:10px;">
+                        ${v.objectText || "No description"}
+                    </div>
+
+                    ${req.session.loggedin ? `
+                        <a href="/api/editvirus/${v.ID}">Edit Info</a>
+                    ` : ""}
+
+                    <p><b>PDF:</b> 
+                        ${v.pdfFile ? `<a href="/pdf/${v.pdfFile}" target="_blank">Open</a>` : "None"}
+                    </p>
+
+                    <p><b>Presentation Video:</b> 
+                        ${v.presentationVideoLink ? `<a href="${v.presentationVideoLink}" target="_blank">Watch</a>` : "None"}
+                    </p>
+
+                    <p><b>Security Video:</b> 
+                        ${v.securityVideoLink ? `<a href="${v.securityVideoLink}" target="_blank">Watch</a>` : "None"}
+                    </p>
+
+                </div>
+                `;
+
+                res.write(htmloutput);
+            }
+
+        }
+        catch(err)
+        {
+            console.error(err);
+            res.write("<h1>Error loading object</h1>");
+        }
+
+        res.write(htmlinfostop);
+        res.write(htmlbottom);
+        res.end();
+    }
+
+    sqlQuery();
 });
 
 
