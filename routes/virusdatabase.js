@@ -24,6 +24,9 @@ var htmlbottom = readHTML('html/bottom.html');
 router.get('/', (req, res) =>
 {
 
+if (!req.session.loggedin || !['A','B'].includes(req.session.securityAccessLevel)) {
+    return res.status(403).send('Access denied.');
+}
 
 let str_objectNumber, str_objectName, str_objectCreator, str_objectCreatedDate, str_objectStatus;
 
@@ -56,7 +59,8 @@ res.write(pug_loggedinmenu({
 employeecode: req.cookies.employeecode,
 name: req.cookies.name,
 lastlogin: req.cookies.lastlogin,
-logintimes: req.cookies.logintimes
+logintimes: req.cookies.logintimes,
+securityAccessLevel: req.session.securityAccessLevel
 }));
 }
 
@@ -148,7 +152,7 @@ htmloutput +=
 "<tr>"+
 "<td class=\"infolight\">"+str_objectNumber+"</td>"+
 "<td class=\"infodark\">"+
-"<a href=\"/api/virus/"+encodeURIComponent(str_objectNumber)+"\">"+
+"<a href=\"/api/virus/"+encodeURIComponent(str_objectNumber)+"\" style=\"color:#336699;\">"+
 str_objectName+
 "</a></td>"+
 "<td class=\"infolight\">"+str_objectCreator+"</td>"+
@@ -159,7 +163,7 @@ if(req.session.loggedin)
 {
 
 htmloutput +=
-"<td><a href=\"http://localhost:3000/api/editvirus/"+id+"\" style=\"color:#336699;\">E</a></td>"+
+"<td style=\"text-align:center;\"><a href=\"http://localhost:3000/api/editvirus/"+id+"\" style=\"color:#000000;\"><i class=\"fa-solid fa-pen\"></i></a></td>"+
 "<td><a href=\"http://localhost:3000/api/deletevirus/"+id+"\" style=\"color:#336699;\">D</a></td>";
 
 }
@@ -235,18 +239,18 @@ router.get('/:id', (req, res) =>
                     </div>
 
                     ${req.session.loggedin ? `
-                        <a href="/api/editvirus/${v.ID}">Edit Info</a>
+                        <a href="/api/editvirus/${v.ID}" style="color:#336699;">Edit Info</a>
                     ` : ""}
 
-                    <p><b>PDF:</b> 
+                    <p><b>PDF:</b>
                         ${v.pdfFile ? `<a href="/pdf/${v.pdfFile}" target="_blank">Open</a>` : "None"}
                     </p>
 
-                    <p><b>Presentation Video:</b> 
+                    <p><b>Presentation Video:</b>
                         ${v.presentationVideoLink ? `<a href="${v.presentationVideoLink}" target="_blank">Watch</a>` : "None"}
                     </p>
 
-                    <p><b>Security Video:</b> 
+                    <p><b>Security Video:</b>
                         ${v.securityVideoLink ? `<a href="${v.securityVideoLink}" target="_blank">Watch</a>` : "None"}
                     </p>
 

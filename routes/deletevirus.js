@@ -16,7 +16,7 @@ await connection.execute(`
 DELETE FROM ResearchObjects WHERE ID=${id}
 `);
 
-res.redirect('/api/virusdatabase');
+res.redirect('/api/virus');
 
 }
 

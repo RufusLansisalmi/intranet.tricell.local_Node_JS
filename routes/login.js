@@ -33,8 +33,9 @@ router.get('/', (req, res) => {
             str_lockout = result[0]['lockout'];
 
             async function sqlQuery3() {
-                const result3 = await connection.query("SELECT name FROM employee WHERE employeeCode='" + employeeid + "'");
+                const result3 = await connection.query("SELECT name, securityAccessLevel FROM employee WHERE employeeCode='" + employeeid + "'");
                 str_name = result3[0]['name'];
+                req.session.securityAccessLevel = result3[0]['securityAccessLevel'];
 
                 if (str_lockout == null) {
                     if (str_passwd == passwd) {
@@ -77,7 +78,7 @@ router.get('/:successful', (req, res) => {
     if (req.session.loggedin) { var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
     if (req.session.loggedin) { var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
     if (req.session.loggedin) {
-        res.write(pug_loggedinmenu({ employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes }));
+        res.write(pug_loggedinmenu({ employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel }));
     }
     if (req.session.loggedin) {
         res.write("Login successful<br /><p />");

@@ -52,7 +52,69 @@
         text-align: left;
         color: #336699;
     }
-    #calcLayer 
+    #chatLayer
+    {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 12;
+        background-color: #cccccc;
+        width: 300px;
+        padding: 10px;
+        border: 1px solid black;
+        display: none;
+    }
+    #chatLayerTitle
+    {
+        background-color: #336699;
+        color: #ffffff;
+        font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
+        font-size: 12px;
+        font-weight: bold;
+        padding: 5px;
+        margin-bottom: 6px;
+        border: 1px solid black;
+    }
+    #chatLayerMessages
+    {
+        height: 180px;
+        overflow-y: auto;
+        border: 1px solid black;
+        padding: 5px;
+        background-color: #eeeeee;
+        font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
+        font-size: 11px;
+        margin-bottom: 6px;
+    }
+    #chatmessage
+    {
+        width: 100%;
+        box-sizing: border-box;
+        padding: 5px;
+        margin-bottom: 4px;
+        border: 1px solid black;
+        background-color: #eeeeee;
+        font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
+        font-size: 12px;
+    }
+    #chatSendButton
+    {
+        width: 100%;
+        background-color: #999999;
+        color: #000000;
+        border: 1px solid black;
+        padding: 5px;
+        cursor: pointer;
+        font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    #chatSendButton:hover
+    {
+        background-color: #888888;
+    }
+    #calcLayer
     {
         position: fixed;
         top: 50%;

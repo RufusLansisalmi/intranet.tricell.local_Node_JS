@@ -48,7 +48,7 @@ router.get('/', (req, res) =>
         if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
        // if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
         if(req.session.loggedin){
-    res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes}));
+    res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
 }
     	res.write(htmlmenu);
     	res.write(htmlinfostart);
@@ -129,7 +129,7 @@ htmloutput += '' +
               if(req.session.loggedin)
 
                 {
-            htmloutput += "<td><a href=\"http://localhost:3000/api/editemployee/"+id+"\" style=\"color:#336699;\">E</a></td>\n"+
+            htmloutput += "<td style=\"text-align:center;\"><a href=\"http://localhost:3000/api/editemployee/"+id+"\" style=\"color:#000000;\"><i class=\"fa-solid fa-pen\"></i></a></td>\n"+
             "<td><a href=\"http://localhost:3000/api/deleteemployee/"+id+"\" style=\"color:#336699;\">D</a></td></td>";
 }
   htmloutput += "</tr>";
@@ -208,7 +208,7 @@ router.get('/:employeeid', (req, res) =>
     if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
     //if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
       if(req.session.loggedin){
-        res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes}));
+        res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
     }
     res.write(htmlheader);
     res.write(htmlmenu);

@@ -70,7 +70,7 @@ VALUES
 '${req.body.objectStatus}')
 `);
 
-res.redirect('/api/virusdatabase');
+res.redirect('/api/virus');
 
 }
 

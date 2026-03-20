@@ -100,6 +100,7 @@ router.post('/', function(request, response)
                 name: request.cookies.name,
                 logintimes: request.cookies.logintimes,
                 lastlogin: request.cookies.lastlogin,
+                securityAccessLevel: request.session.securityAccessLevel,
               }));
         }
         response.write(htmlHeader);
@@ -206,6 +207,9 @@ router.get('/', (request, response) =>
         response.write(htmlNewEmployeeJS);
         htmlNewEmployee = readHTML('./html/newemployee.html');
         response.write(htmlNewEmployee);
+    
+
+
     }
     else
     {

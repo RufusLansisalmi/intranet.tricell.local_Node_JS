@@ -90,26 +90,27 @@ td.contacticon
 }
 #mainmenu
 {
-   
+   width: 758px;
    height: 30px;
-   margin-left: 111px;
+   margin-left: 110px;
    border: 1px solid #000000;
    background-color: #274f26;
    padding: 0;
    text-align: center;
    position: relative;
-   float: left;
+   overflow: hidden;
 }
 #mainmenuback	/* menyn med Back-knappen */
 {
-	width: 788px;
+	width: 758px;
 	height: 30px;
-	margin-left: 80px;
+	margin-left: 110px;
 	border: 1px solid;
 	border-color: #000000;
 	background-color: #274f26;
 	padding: 0px;
 	text-align: center;
+	overflow: hidden;
 }
 .menuitem{
    
