@@ -267,6 +267,13 @@ router.get('/:id', (req, res) =>
             res.write("<h1>Error loading object</h1>");
         }
 
+        entriesCSS = readHTML('./html/researchentries_css.html');
+        res.write(entriesCSS);
+        entriesJS = readHTML('./html/researchentries_js.html');
+        res.write(entriesJS);
+        entriesHTML = readHTML('./html/researchentries.html');
+        res.write(entriesHTML);
+
         res.write(htmlinfostop);
         res.write(htmlbottom);
         res.end();

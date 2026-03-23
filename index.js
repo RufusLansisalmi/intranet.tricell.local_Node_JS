@@ -31,6 +31,9 @@ const chat = require('./routes/chat');
 const newvirus = require('./routes/newvirus');
 const editvirus = require('./routes/editvirus');
 const deletevirus = require('./routes/deletevirus');
+const entries = require('./routes/entries');
+const fileuploadvirus = require('./routes/fileuploadvirus');
+const editvirusimage = require('./routes/editvirusimage');
 
 
 //läser in MAster-frame
@@ -90,6 +93,9 @@ app.use('/api/chat', chat);
 app.use('/api/newvirus', newvirus);
 app.use('/api/editvirus', editvirus);
 app.use('/api/deletevirus', deletevirus);
+app.use('/api/entries', entries);
+app.use('/api/fileuploadvirus', fileuploadvirus);
+app.use('/api/editvirusimage', editvirusimage);
 
 
 

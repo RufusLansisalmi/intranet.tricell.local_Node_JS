@@ -9,6 +9,12 @@ const id = req.params.id;
 const connection = ADODB.open(
 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb'
 );
+//radera bilderna 
+var imagePath = `./public/virusphoto/${id}/`;
+if (fs.existsSync(imagePath)) 
+    {
+    fs.rmSync(imagePath, { recursive: true });
+    }
 
 async function remove(){
 

@@ -1,7 +1,11 @@
 const express = require('express');
 const router = express.Router();
 const ADODB = require('node-adodb');
-
+const pug = require('pug');
+const {response} = require('express');
+const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_editvirus = pug.compileFile('./html/editvirus.html');
+const {getVirusImagesHTML} = require('./virusimages.js');
 const readHTML = require('../readHTML.js');
 
 var htmlhead = readHTML('html/head.html');
@@ -10,6 +14,10 @@ var htmlmenu = readHTML('html/menu.html');
 var htmlinfostart = readHTML('html/infostart.html');
 var htmlinfostop = readHTML('html/infostop.html');
 var htmlbottom = readHTML('html/bottom.html');
+var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html');
+var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
+var loggedinMenu = readHTML('./html/loggedinmenu.html');
+var htmlVirusimagesCSS = readHTML('./html/virusimages_css.html');
 
 router.get('/:id', (req,res)=>{
 
@@ -30,6 +38,7 @@ let v = result[0];
 res.write(htmlhead);
 res.write(htmlheader);
 res.write(htmlmenu);
+res.write(htmlVirusimagesCSS);
 res.write(htmlinfostart);
 
 let html = `
@@ -72,6 +81,25 @@ Security Handling Video (URL):<br>
 res.write(html);
 
 res.write(htmlinfostop);
+htmlNewvirusCSS = readHTML('./html/newvirus_css.html');
+res.write(htmlNewvirusCSS);
+htmlNewvirusJS = readHTML('./html/newvirus_js.html');
+res.write(htmlNewvirusJS);
+res.write(htmlVIrusimagesCSS);
+res.write(pug_editvirus({
+    id: id,
+    virusnumber: str_objectNumber,
+    virusname: str_objectName,
+    createdate: str_objectCreatedDate,
+    creator: str_objectCreator,
+    description: str_objectText,
+    viruspdf: pdf,
+    virusvideo: str_presentationVideoLink,
+    virushanlingvideo: str_securityVideoLink,
+
+}));
+res.write(getVirusImagesHTML(id));
+
 res.write(htmlbottom);
 res.end();
 
