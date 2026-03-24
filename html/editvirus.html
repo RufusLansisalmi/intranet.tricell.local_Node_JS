@@ -1,0 +1,30 @@
+<table style="width:100%; border-collapse:collapse; margin-top:20px;">
+<tr>
+<td style="padding:8px; font-weight:bold;">Security data sheet:</td>
+<td style="padding:8px;">!{viruspdf}</td>
+<td style="padding:8px;">
+if viruspdf
+  a(href="/public/pdf/" + viruspdf, target="_blank", class="virusimages-upload-btn") &#128065;
+</td>
+<td style="padding:8px;">
+if viruspdf
+  a(href="/api/deletepdf/" + id, class="virusimages-delete-btn") &#x2715;
+</td>
+</tr>
+<tr>
+<td style="padding:8px; font-weight:bold;">Security Presentation Video:</td>
+<td style="padding:8px;">!{virusvideo}</td>
+<td style="padding:8px;">
+if virusvideo
+  a(href=virusvideo, target="_blank", class="virusimages-upload-btn") &#128065;
+</td>
+</tr>
+<tr>
+<td style="padding:8px; font-weight:bold;">Security Handling Video:</td>
+<td style="padding:8px;">!{virushanlingvideo}</td>
+<td style="padding:8px;">
+if virushanlingvideo
+  a(href=virushanlingvideo, target="_blank", class="virusimages-upload-btn") &#128065;
+</td>
+</tr>
+</table>

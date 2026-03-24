@@ -34,6 +34,10 @@ const deletevirus = require('./routes/deletevirus');
 const entries = require('./routes/entries');
 const fileuploadvirus = require('./routes/fileuploadvirus');
 const editvirusimage = require('./routes/editvirusimage');
+const panic = require('./routes/panic');
+const activityLog = require('./routes/activityLog');
+const userdatabase = require('./routes/userdatabase');
+const livestream = require('./routes/livestream');
 
 
 //läser in MAster-frame
@@ -96,7 +100,10 @@ app.use('/api/deletevirus', deletevirus);
 app.use('/api/entries', entries);
 app.use('/api/fileuploadvirus', fileuploadvirus);
 app.use('/api/editvirusimage', editvirusimage);
-
+app.use('/api/panic', panic);
+app.use('/api/activitylog', activityLog);
+app.use('/api/userdatabase', userdatabase);
+app.use('/api/livestream', livestream);
 
 
 const server = app.listen(3000, () =>

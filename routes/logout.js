@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+const ADODB = require('node-adodb');
 
  var fs = require('fs');
  const path = require('path');
@@ -19,6 +20,15 @@ var htmlbottom = readHTML('html/bottom.html');
 
 router.get('/', (req, res) =>
 {
+    const employeecode = req.cookies.employeecode;
+    const name = req.cookies.name;
+
+    const logConnection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/activity_log.mdb;');
+    const d = new Date();
+    const loginDate = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
+    const timeOfLogout = d.getHours() + ":" + String(d.getMinutes()).padStart(2, '0');
+    logConnection.execute("INSERT INTO [Log] (EmployeeCode, [Name], [Date], [Time], Activity) VALUES ('" + employeecode + "', '" + name + "', '" + loginDate + "', '" + timeOfLogout + "', 'Logout')");
+
     req.session.destroy();
 
     res.writeHead(200, {'Content-Type': 'text/html'});

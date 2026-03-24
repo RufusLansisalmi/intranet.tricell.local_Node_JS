@@ -9,6 +9,7 @@ router.use(express.static('./public'));
 
 const readHTML = require('../readHTML.js');
 const pug = require('pug');
+const backupVirus = require('../backup.js');
 
 const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
 
@@ -29,6 +30,7 @@ if (!req.session.loggedin || !['A','B'].includes(req.session.securityAccessLevel
 }
 
 let str_objectNumber, str_objectName, str_objectCreator, str_objectCreatedDate, str_objectStatus;
+const userLevel = req.session.securityAccessLevel;
 
 const connection = ADODB.open(
 'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb'
@@ -70,8 +72,9 @@ res.write(htmlinfostart);
 
 // PAGE CONTENT
 
-let htmloutput = 
-"<link rel=\"stylesheet\" href=\"css/personnel_registry.css\" \/>";
+let htmloutput =
+"<link rel=\"stylesheet\" href=\"css/personnel_registry.css\" \/>" +
+"<style>.row-archived td { background-color: #e0e0e0 !important; color: #777 !important; } .row-archived a { color: #666 !important; }</style>";
 
 if(req.session.loggedin)
 {
@@ -148,8 +151,13 @@ str_objectCreator = result[i]['objectCreator'];
 str_objectCreatedDate = result[i]['objectCreatedDate'];
 str_objectStatus = result[i]['objectStatus'];
 
+if (str_objectStatus === 'archive' && userLevel !== 'A') {
+    continue;
+}
+const archiveClass = (str_objectStatus === 'archive') ? 'row-archived' : '';
+
 htmloutput +=
-"<tr>"+
+"<tr class=\"" + archiveClass + "\">"+
 "<td class=\"infolight\">"+str_objectNumber+"</td>"+
 "<td class=\"infodark\">"+
 "<a href=\"/api/virus/"+encodeURIComponent(str_objectNumber)+"\" style=\"color:#336699;\">"+
@@ -198,6 +206,88 @@ sqlQuery().catch(err => { console.error('virusdatabase error:', err); if (!res.h
 
 });
 
+// --------------------- Växla Open/Archive -------------------
+router.get('/toggle/:id', async function(req, res) {
+    const targetId = req.params.id;
+    const userLevel = req.session.securityAccessLevel;
+
+    if (userLevel !== 'A') {
+        return res.status(403).send("Behörighet saknas.");
+    }
+
+    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb');
+
+    try {
+        const result = await connection.query(`SELECT objectStatus FROM ResearchObjects WHERE ID=${targetId}`);
+        if (result.length > 0) {
+            const newStatus = (result[0].objectStatus === 'open') ? 'archive' : 'open';
+            await connection.execute(`UPDATE ResearchObjects SET objectStatus='${newStatus}' WHERE ID=${targetId}`);
+        }
+        res.redirect('/api/virus');
+    } catch(err) {
+        if (!res.headersSent) res.status(500).send("Update failed: " + err.message);
+    }
+});
+
+// --------------------- Läs en virus efter backup -----------------------------
+router.get('/backup/:id', async function(req, res) {
+    const targetId = req.params.id;
+
+    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb');
+
+    res.write(htmlhead);
+    res.write(htmlheader);
+    res.write(htmlmenu);
+    res.write(htmlinfostart);
+
+    try {
+        const result = await connection.query(`SELECT * FROM ResearchObjects WHERE ID=${targetId}`);
+
+        if (result.length === 0) {
+            res.write("<h1>Object not found</h1>");
+        } else {
+            const v = result[0];
+            let htmlOutput = `
+                <h2>${v.objectNumber} ${v.objectName}</h2>
+                <div style="border:1px solid #333;padding:15px;width:600px;background:#f5f5f5;">
+                    <div style="background:#cfe2ff;padding:10px;margin-bottom:10px;">
+                        ${v.objectText || "No description"}
+                    </div>
+                    <p><b>PDF:</b> ${v.pdfFile ? `<a href="/pdf/${v.pdfFile}" target="_blank">Open</a>` : "None"}</p>
+                    <p><b>Presentation Video:</b> ${v.presentationVideoLink ? `<a href="${v.presentationVideoLink}" target="_blank">Watch</a>` : "None"}</p>
+                    <p><b>Security Video:</b> ${v.securityVideoLink ? `<a href="${v.securityVideoLink}" target="_blank">Watch</a>` : "None"}</p>
+            `;
+
+            if (req.session.securityAccessLevel === 'A' || req.session.securityAccessLevel === 'B') {
+                htmlOutput += `
+                <div style="display:flex; align-items:center; justify-content:space-between; width:650px;">
+                    <a href="http://localhost:3000/api/editvirus/${v.ID}" style="color:#336699;text-decoration:none;">
+                        <button style="margin-top:10px; padding:6px 14px; background:#4682B4; color:#000; border:1px solid #000; border-radius:0; font-size:12px; font-weight:bold; cursor:pointer;">Edit info</button>
+                    </a>
+                    <button style="margin-top:10px; padding:6px 14px; background:#4682B4; color:#000; border:1px solid #000; border-radius:0; font-size:12px; font-weight:bold; cursor:pointer;">`;
+
+                if (await backupVirus(result)) {
+                    htmlOutput += `Virus is now backed up`;
+                } else {
+                    htmlOutput += `Error backing up virus`;
+                }
+
+                htmlOutput += `</button></div>`;
+            }
+
+            htmlOutput += `</div>`;
+            res.write(htmlOutput);
+        }
+    } catch(err) {
+        console.error(err);
+        res.write("<h1>Error during backup</h1>");
+    }
+
+    res.write(htmlinfostop);
+    res.write(htmlbottom);
+    res.end();
+});
+
 router.get('/:id', (req, res) =>
 {
     const objectNumber = decodeURIComponent(req.params.id);
@@ -238,8 +328,10 @@ router.get('/:id', (req, res) =>
                         ${v.objectText || "No description"}
                     </div>
 
-                    ${req.session.loggedin ? `
-                        <a href="/api/editvirus/${v.ID}" style="color:#336699;">Edit Info</a>
+                    ${req.session.securityAccessLevel === 'A' ? `
+                        <a href="/api/virus/toggle/${v.ID}" style="color:#336699; margin-left:15px;">
+                            ${v.objectStatus === 'open' ? 'Archive Object' : 'Open Object'}
+                        </a>
                     ` : ""}
 
                     <p><b>PDF:</b>
@@ -253,6 +345,17 @@ router.get('/:id', (req, res) =>
                     <p><b>Security Video:</b>
                         ${v.securityVideoLink ? `<a href="${v.securityVideoLink}" target="_blank">Watch</a>` : "None"}
                     </p>
+
+                    ${(req.session.securityAccessLevel === 'A' || req.session.securityAccessLevel === 'B') ? `
+                    <div style="display:flex; align-items:center; justify-content:space-between; width:650px;">
+                        <a href="http://localhost:3000/api/editvirus/${v.ID}" style="color:#336699;text-decoration:none;">
+                            <button style="margin-top:10px; padding:6px 14px; background:#4682B4; color:#000; border:1px solid #000; border-radius:0; font-size:12px; font-weight:bold; cursor:pointer;">Edit info</button>
+                        </a>
+                        <a href="http://localhost:3000/api/virus/backup/${v.ID}" style="color:#336699;text-decoration:none;">
+                            <button style="margin-top:10px; padding:6px 14px; background:#4682B4; color:#000; border:1px solid #000; border-radius:0; font-size:12px; font-weight:bold; cursor:pointer;">Backup virus</button>
+                        </a>
+                    </div>
+                    ` : ""}
 
                 </div>
                 `;

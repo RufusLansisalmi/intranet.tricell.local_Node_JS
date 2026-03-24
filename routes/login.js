@@ -51,8 +51,19 @@ router.get('/', (req, res) => {
                         res.cookie('lastlogin', str_lastlogin);
                         res.cookie('logintimes', int_logintimes);
 
+                        res.cookie("sortAmount", 20);
+                        res.cookie("sortType", "ID");
+
                         async function sqlQuery2() {
                             await connection.execute("UPDATE users SET logintimes='" + int_logintimes + "', lastlogin='" + str_lastlogin + "' WHERE employeeCode='" + employeeid + "'");
+
+                            const logConnection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/activity_log.mdb;');
+                            let ts2 = Date.now();
+                            let d = new Date(ts2);
+                            let loginDate = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
+                            let timeOfLogin = d.getHours() + ":" + String(d.getMinutes()).padStart(2, '0');
+                            await logConnection.execute("INSERT INTO [Log] (EmployeeCode, [Name], [Date], [Time], Activity) VALUES ('" + employeeid + "', '" + str_name + "', '" + loginDate + "', '" + timeOfLogin + "', 'Login')");
+                            await logConnection.execute("DELETE FROM [Log] WHERE ID NOT IN (SELECT TOP 150 ID FROM [Log] ORDER BY ID DESC)");
                         }
                         sqlQuery2();
                         res.redirect('/api/personnelregistry/' + employeeid);
@@ -85,6 +96,23 @@ router.get('/:successful', (req, res) => {
     } else {
         res.write("Login unsuccessful<br /><p />");
     }
+    const logConnection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/activity_log.mdb;');
+    const deleteRow150 = logConnection.execute("DELETE FROM [Log] WHERE ID NOT IN (SELECT TOP 150 ID FROM [Log] ORDER BY ID DESC)");
+   // getting dat of login
+   let ts = Date.now();
+    let date_ob = new Date(ts);
+    let date = date_ob.getDate();
+    let month = date_ob.getMonth() + 1;
+    let year = date_ob.getFullYear();
+    let loginDate = date + "." + month + "." + year;
+    //getting time of login
+    let hourOFLogin = date_ob.getHours();
+    let minuteOfLogin = date_ob.getMinutes();
+    let timeOfLogin = hourOFLogin + ":" + minuteOfLogin;
+
+    const updateLog = logConnection.execute("INSERT INTO [Log] (EmployeeCode, [Name], [Date], [Time], Activity) VALUES ('" + req.cookies.employeecode + "', '" + req.cookies.name + "', '" + loginDate + "', '" + timeOfLogin + "', 'Login')");
+   
+   
     res.write(htmlinfostop);
     res.write(htmlbottom);
     res.end();

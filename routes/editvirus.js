@@ -6,6 +6,7 @@ const {response} = require('express');
 const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
 const pug_editvirus = pug.compileFile('./html/editvirus.html');
 const {getVirusImagesHTML} = require('./virusimages.js');
+const {getAttachmentsHTML} = require('./fileuploadvirus.js');
 const readHTML = require('../readHTML.js');
 
 var htmlhead = readHTML('html/head.html');
@@ -80,26 +81,25 @@ Security Handling Video (URL):<br>
 
 res.write(html);
 
-res.write(htmlinfostop);
 htmlNewvirusCSS = readHTML('./html/newvirus_css.html');
 res.write(htmlNewvirusCSS);
 htmlNewvirusJS = readHTML('./html/newvirus_js.html');
 res.write(htmlNewvirusJS);
-res.write(htmlVIrusimagesCSS);
 res.write(pug_editvirus({
     id: id,
-    virusnumber: str_objectNumber,
-    virusname: str_objectName,
-    createdate: str_objectCreatedDate,
-    creator: str_objectCreator,
-    description: str_objectText,
-    viruspdf: pdf,
-    virusvideo: str_presentationVideoLink,
-    virushanlingvideo: str_securityVideoLink,
-
+    virusnumber: v.objectNumber,
+    virusname: v.objectName,
+    createdate: v.objectCreatedDate,
+    creator: v.objectCreator,
+    description: v.objectText,
+    viruspdf: v.pdfFile,
+    virusvideo: v.presentationVideoLink,
+    virushanlingvideo: v.securityVideoLink,
 }));
 res.write(getVirusImagesHTML(id));
+res.write(getAttachmentsHTML(id));
 
+res.write(htmlinfostop);
 res.write(htmlbottom);
 res.end();
 
