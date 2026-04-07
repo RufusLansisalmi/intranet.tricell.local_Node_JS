@@ -24,6 +24,7 @@ var htmlheader = readHTML('html/header.html');
 var htmlmenu = readHTML('html/menu.html');
 var htmlinfostart = readHTML('html/infostart.html');
 var htmlinfostop = readHTML('html/infostop.html');
+var htmlFooter = readHTML('html/footer.html')
 var htmlbottom = readHTML('html/bottom.html');
 
 router.get('/', (req, res) =>
@@ -178,6 +179,7 @@ htmloutput += '' +
     res.write(htmloutput);
 	  // skriv ut masterframe nedre delen
     res.write(htmlinfostop);
+    res.write(htmlFooter);
     res.write(htmlbottom);
     res.end();
 
@@ -354,6 +356,7 @@ if (result && result.length > 0) {
         res.write(htmlOutput);
     // skriv ut masterframe nedre delen
     res.write(htmlinfostop);
+    res.write(htmlFooter);
     res.write(htmlbottom);
     res.end();
 	}

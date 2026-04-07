@@ -21,6 +21,7 @@ var htmlheader = readHTML('html/header.html');
 var htmlmenu = readHTML('html/menu.html');
 var htmlinfostart = readHTML('html/infostart.html');
 var htmlinfostop = readHTML('html/infostop.html');
+var htmlFooter = readHTML('html/footer.html')
 var htmlbottom = readHTML('html/bottom.html');
 
 
@@ -51,15 +52,8 @@ router.get('/', (req, res) =>
 router.get('/:infotext', (req, res) =>
 {
     const infotext = req.params.infotext;
-
-    if (infotext =="")
-    {
-        var htmlmenu = readHTML('html/menu.html');
-    }
-    else
-    {
-        var htmlmenu = readHTML('html/menu_back.html');
-    }
+    var htmlmenu = readHTML('html/menu.html');
+   
 
     res.write(htmlhead);
     res.write(htmlheader);
@@ -83,6 +77,7 @@ router.get('/:infotext', (req, res) =>
     res.write(htmlinfo);
 
     res.write(htmlinfostop);
+    res.write(htmlFooter);
     res.write(htmlbottom);
 
     res.end();
