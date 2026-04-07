@@ -2,7 +2,7 @@
 {
     height: 100%;
     display: grid;
-    grid-template-columns: auto 800px 300px auto;
+    grid-template-columns: auto 800px 200px auto;
     grid-template-rows: 30px 300px 50px auto 250px;
     grid-gap: 0px;
 

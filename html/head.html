@@ -8,11 +8,7 @@
 <script language="JavaScript" src="script/MD5.js"></script>
 
 <script>
-document.addEventListener("keypress", event => {
-    if (event.key == "t") {
-        document.getElementById("loginLayer").style.display = "block";
-    }
-});
+
 
 function formCheck() {
     if (document.form.femployeecode.value == "") {
@@ -89,15 +85,3 @@ function formCheck() {
 </div>
 <!------------------------- Left-menu slut ------------------------------>
 
-<!---------------------Hidden login-prompt start------------------------->
-<div id="loginLayer">
-    <h1>Login</h1>
-    <form name="form" action="/api/login" onSubmit="return formCheck()" method="get">
-        Employee Code: <input type="text" name="femployeecode" size="7" maxlength="7" />
-        <p />
-        Password: <input type="password" name="fpassword" size="7" maxlength="7" />
-        <p />
-        <input type="submit" value="Login" /><input type="reset" value="Reset" />
-    </form>
-</div>
- 

@@ -21,7 +21,7 @@ router.get('/', (req, res) => {
     const employeeid = req.query.femployeecode;
     const passwd = req.query.fpassword;
     const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
-
+    console.log(passwd);
     async function sqlQuery() {
         const result = await connection.query("SELECT passwd, logintimes, lastlogin, lockout FROM users WHERE employeeCode='" + employeeid + "'");
         if (result == "") {
