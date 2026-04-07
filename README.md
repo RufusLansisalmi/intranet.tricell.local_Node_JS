@@ -20,7 +20,7 @@ Development" (5 ECTS)**, making this course a natural continuation of earlier wo
 
 /data – Data sources in various formats for exercises (JSON, XML, MDB)
 
-/masterframe – Frontend HTML files
+/html – Frontend HTML files
 
 /public/css – Stylesheet files
 
