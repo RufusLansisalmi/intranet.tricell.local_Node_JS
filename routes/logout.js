@@ -1,54 +1,45 @@
 const express = require('express');
 const router = express.Router();
-const ADODB = require('node-adodb');
 
- var fs = require('fs');
- const path = require('path');
-
-const readHTML = require('../readHTML');
-router.use(express.static('public'));
+router.use(express.static('./public'));
+const path = require('path');
 
 
+// --------------------- Läs in Masterframen --------------------------------------------------
+const readHTML = require('../readHTML.js');
+const fs = require('fs');
 
-var htmlhead = readHTML('html/head.html');
-var htmlheader = readHTML('html/header.html');
-var htmlmenu = readHTML('html/menu.html');
-var htmlinfostart = readHTML('html/infostart.html');
-var htmlinfostop = readHTML('html/infostop.html');
-var htmlbottom = readHTML('html/bottom.html');
+var htmlHead = readHTML('./masterframe/head.html');
+var htmlHeader = readHTML('./masterframe/header.html');
+var htmlMenu = readHTML('./masterframe/menu.html');    
+var htmlInfoStart = readHTML('./masterframe/infoStart.html');
+var htmlInfoStop = readHTML('./masterframe/infoStop.html');
+var htmlFooter = readHTML('./masterframe/footer.html');
+var htmlBottom = readHTML('./masterframe/bottom.html');
 
-
-router.get('/', (req, res) =>
+// --------------------- Router -----------------------------------------------
+router.get('/', function(request, response)
 {
-    const employeecode = req.cookies.employeecode;
-    const name = req.cookies.name;
+ 
+    request.session.destroy();
 
-    const logConnection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/activity_log.mdb;');
-    const d = new Date();
-    const loginDate = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
-    const timeOfLogout = d.getHours() + ":" + String(d.getMinutes()).padStart(2, '0');
-    logConnection.execute("INSERT INTO [Log] (EmployeeCode, [Name], [Date], [Time], Activity) VALUES ('" + employeecode + "', '" + name + "', '" + loginDate + "', '" + timeOfLogout + "', 'Logout')");
+    response.clearCookie('employeecode');
+    response.clearCookie('name');
+    response.clearCookie('lastlogin');
+    response.clearCookie('logintimes');
 
-    req.session.destroy();
+    response.setHeader('Content-type','text/html');
+    response.write(htmlHead);
+    response.write(htmlHeader);
+    response.write(htmlMenu);
+    response.write(htmlInfoStart);
 
-    res.writeHead(200, {'Content-Type': 'text/html'});
-    res.write(htmlhead);
-    res.write(htmlheader);
-   // if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
-   // if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-   // if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-    res.write(htmlmenu);
-    res.write(htmlinfostart);
+    response.write("User logged out");
 
-    res.write("You have been logged out");
-    
-
-    res.write(htmlinfostop);
-    res.write(htmlbottom);
-
-    res.end();
-
+    response.write(htmlInfoStop);
+    response.write(htmlFooter);
+    response.write(htmlBottom);
+    response.end();
 });
-
 
 module.exports = router;

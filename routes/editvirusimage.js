@@ -11,27 +11,27 @@ const path = require('path');
 
 const pug = require('pug');
 const { response } = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
-const pug_editemployee = pug.compileFile('./html/editemployee.html');
+const pug_loggedinmenu = pug.compileFile('./masterframe/loggedinmenu.html');
+const pug_editemployee = pug.compileFile('./masterframe/editemployee.html');
 
 
 
-// --------------------- Läs in htmln --------------------------------
+// --------------------- Läs in Masterframen --------------------------------
 const readHTML = require('../readHTML.js');
 const fs = require('fs');
 
-var htmlHead = readHTML('./html/head.html');
-var htmlHeader = readHTML('./html/header.html');
-var htmlMenu = readHTML('./html/menu.html');
-var htmlInfoStart = readHTML('./html/infoStart.html');
-var htmlInfoStop = readHTML('./html/infoStop.html');
-var htmlFooter = readHTML('./html/footer.html');
-var htmlBottom = readHTML('./html/bottom.html');
+var htmlHead = readHTML('./masterframe/head.html');
+var htmlHeader = readHTML('./masterframe/header.html');
+var htmlMenu = readHTML('./masterframe/menu.html');
+var htmlInfoStart = readHTML('./masterframe/infoStart.html');
+var htmlInfoStop = readHTML('./masterframe/infoStop.html');
+var htmlFooter = readHTML('./masterframe/footer.html');
+var htmlBottom = readHTML('./masterframe/bottom.html');
 
-var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html');
-var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
-var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html');
-var htmlVirusimagesCSS = readHTML('./html/virusimages_css.html');
+var htmlLoggedinMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');
+var htmlLoggedinMenuJS = readHTML('./masterframe/loggedinmenu_js.html');
+var htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
+var htmlVirusimagesCSS = readHTML('./masterframe/virusimages_css.html');
 
 router.get('/deletevirusimage/:virusId/:imageNumber', function(request, response) {
     let virusId = request.params.virusId;

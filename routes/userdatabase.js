@@ -1,301 +1,317 @@
+/* =========================================================================
+   USERDATABASE.JS - Administratörsverktyg för Användarhantering
+   =========================================================================
+   Detta skript hanterar CRUD-operationer (Create, Read, Update, Delete)
+   för både inloggningsuppgifter (tabell: users) och profiler (tabell: employee).
+*/
+
+const config = require('../config/globals.json');
 const express = require('express');
 const router = express.Router();
+const crypto = require('crypto'); // Används för att MD5-hasha lösenord
 const ADODB = require('node-adodb');
+
+// Öppna anslutningen till Microsoft Access-databasen (.mdb) via Jet OLEDB-drivrutinen
+const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
+
+// Gör "public"-mappen tillgänglig för statiska filer (CSS/Bilder)
+router.use(express.static('./public'));
+
+// Importera Pug för att kunna rendera den dynamiska menyn (loggedinmenu)
 const pug = require('pug');
+const pug_loggedinmenu = pug.compileFile('./masterframe/loggedinmenu.html');
 const readHTML = require('../readHTML.js');
 
-router.use(express.urlencoded({ extended: false }));
+// Ladda in Masterframe-komponenter (HTML-mallar)
+var htmlHead = readHTML('./masterframe/head.html');
+var htmlHeader = readHTML('./masterframe/header.html');
+var htmlMenu = readHTML('./masterframe/menu.html');    
+var htmlInfoStart = readHTML('./masterframe/infoStart.html');
+var htmlInfoStop = readHTML('./masterframe/infoStop.html');
+var htmlFooter = readHTML('./masterframe/footer.html');
+var htmlBottom = readHTML('./masterframe/bottom.html');
 
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
-
-var htmlhead     = readHTML('./html/head.html');
-var htmlheader   = readHTML('./html/header.html');
-var htmlmenu     = readHTML('./html/menu.html');
-var htmlinfostart = readHTML('./html/infostart.html');
-var htmlinfostop = readHTML('./html/infostop.html');
-var htmlbottom   = readHTML('./html/bottom.html');
-
-function writeFrame(req, res) {
-    res.write(htmlhead);
-    res.write(htmlheader);
-    if (req.session.loggedin) {
-        res.write(readHTML('./html/loggedinmenu_css.html'));
-        res.write(readHTML('./html/loggedinmenu_js.html'));
-        res.write(pug_loggedinmenu({
-            employeecode: req.cookies.employeecode,
-            name: req.cookies.name,
-            lastlogin: req.cookies.lastlogin,
-            logintimes: req.cookies.logintimes,
-            securityAccessLevel: req.session.securityAccessLevel
-        }));
+/**
+ * HJÄLPFUNKTION: Kontrollera om användaren har behörighet (Nivå A)
+ * Hämtar employeeCode från cookies/session och kollar mot tabellen 'employee'.
+ */
+async function hasAccess(request) {
+    let empCode = request.cookies.employeecode || request.session.username;
+    if (!empCode) return false;
+    try {
+        let result = await connection.query(`SELECT securityAccessLevel FROM employee WHERE employeeCode='${empCode}'`);
+        // Returnerar true endast om användaren finns och har nivån 'A'
+        return (result.length > 0 && result[0].securityAccessLevel === 'A');
+    } catch (err) {
+        return false;
     }
-    res.write(htmlmenu);
-    res.write(htmlinfostart);
 }
 
-// -------------------- List users + Add New User form --------------------
-router.get('/', async (req, res) => {
-    if (!req.session.loggedin || req.session.securityAccessLevel !== 'A') {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        writeFrame(req, res);
-        res.write('<h2>You are not authorised to access this.</h2>');
-        res.write(htmlinfostop);
-        res.write(htmlbottom);
-        return res.end();
-    }
+/**
+ * HJÄLPFUNKTION: Visa ett tydligt rött felmeddelande vid nekad åtkomst
+ */
+function accessDeniedResponse(response) {
+    return response.send("<h1 style='color:red;'>Access Denied</h1><p>You must have <b>Administrator Level A</b> to view this page.</p><a href='/'>Back to start</a>");
+}
 
-    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
+/**
+ * HJÄLPFUNKTIONER FÖR RENDERING
+ * Bygger upp sidans topp och botten med Masterframe.
+ */
+function renderPageTop(request, response, pageTitle) {
+    response.writeHead(200, {'Content-Type': 'text/html'});
+    response.write(htmlHead);
+    response.write(readHTML('./masterframe/loggedinmenu_css.html'));
+    response.write(readHTML('./masterframe/loggedinmenu_js.html'));
+    // Rendera menyn med Pug och skicka med användardata från cookies
+    response.write(pug_loggedinmenu({
+                employeecode: request.cookies.employeecode,
+                name: request.cookies.name,
+                logintimes: request.cookies.logintimes,
+                lastlogin: request.cookies.lastlogin,
+                securityaccesslevel: request.session.securityAccessLevel,
+                 webaddress : config.webaddress || "",
+              }));
+    response.write(htmlHeader);
+    response.write(htmlMenu);
+    response.write(htmlInfoStart);
+    // Lägg till specifik CSS för personregistret
+    response.write(`<link rel="stylesheet" href="/css/personnel_registry.css" />`);
+}
+
+function renderPageBottom(response) {
+    response.write(htmlInfoStop);
+    response.write(htmlFooter);
+    response.write(htmlBottom);
+    response.end();
+}
+
+// -------------------------------------------------------------------------
+// 1. ROUTE: LISTA ALLA ANVÄNDARE (GET /)
+// -------------------------------------------------------------------------
+router.get('/', async (request, response) => {
+    if (!(await hasAccess(request))) return accessDeniedResponse(response);
+    
+    renderPageTop(request, response, "User Management");
+
+    let htmlOutput = `
+    <table border="0" width="100%">
+        <tr>
+            <td align="left"><h2>User Database</h2></td>
+            <td align="right"><a href="/api/userdatabase/add" style="color:green; text-decoration:none; font-weight:bold; border:1px solid green; padding:5px; border-radius:4px;">[+] Add New User</a></td>
+        </tr>
+    </table>
+    <div id="table-resp">
+        <div id="table-header">
+            <div class="table-header-cell-light">Username</div>
+            <div class="table-header-cell-dark">Full Name</div>
+            <div class="table-header-cell-light">Level</div>
+            <div class="table-header-cell-light">Status</div>
+            <div class="table-header-cell-light" style="text-align:center;">Edit</div>
+            <div class="table-header-cell-light" style="text-align:center;">Del</div>
+        </div>
+        <div id="table-body">`;
 
     try {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        writeFrame(req, res);
+        // Hämta data genom att joina users (inloggning) och employee (profilnamn/nivå)
+        const result = await connection.query(`
+            SELECT users.employeeCode, employee.[name], employee.securityAccessLevel, users.lockout 
+            FROM users LEFT JOIN employee ON users.employeeCode = employee.employeeCode`);
 
-        // Get all users joined with employee info
-        const users = await connection.query(`
-            SELECT u.employeeCode, u.lockout, e.[name], e.securityAccessLevel
-            FROM users u
-            LEFT JOIN employee e ON u.employeeCode = e.employeeCode
-            ORDER BY u.employeeCode
-        `);
-
-        // Get employees that don't have a user account yet (for dropdown)
-        const employees = await connection.query(`
-            SELECT e.employeeCode, e.[name]
-            FROM employee e
-            WHERE e.employeeCode NOT IN (SELECT employeeCode FROM users)
-            ORDER BY e.employeeCode
-        `);
-
-        let html = '<link rel="stylesheet" href="css/personnel_registry.css" />';
-
-        // ---- User list table ----
-        html += '<h2>User Database <a href="javascript:void(0)" onclick="document.getElementById(\'addForm\').style.display=document.getElementById(\'addForm\').style.display===\'none\'?\'block\':\'none\'" style="font-size:14px;color:#336699;text-decoration:none;">[+] Add New User</a></h2>';
-
-        html += '<table id="personnel">';
-        html += '<tr>';
-        html += '<td class="infoheadinglight" width="120">Username</td>';
-        html += '<td class="infoheadingdark"  width="220">Full Name</td>';
-        html += '<td class="infoheadinglight" width="60">Level</td>';
-        html += '<td class="infoheadinglight" width="100">Status</td>';
-        html += '<td class="infoheadinglight" width="50">Edit</td>';
-        html += '<td class="infoheadinglight" width="50">Del</td>';
-        html += '</tr>';
-
-        for (let u of users) {
-            const locked  = u.lockout != null && u.lockout !== '';
-            const status  = locked ? '<b style="color:#cc0000;">LOCKED</b>' : 'Active';
-            const encoded = encodeURIComponent(u.employeeCode);
-            html += '<tr>';
-            html += `<td class="infolight">${u.employeeCode}</td>`;
-            html += `<td class="infodark">${u.name || ''}</td>`;
-            html += `<td class="infolight">${u.securityAccessLevel || ''}</td>`;
-            html += `<td class="infolight">${status}</td>`;
-            html += `<td class="infolight" style="text-align:center;"><a href="/api/userdatabase/edit/${encoded}" style="color:#000;">[E]</a></td>`;
-            html += `<td class="infolight" style="text-align:center;"><a href="/api/userdatabase/delete/${encoded}" style="color:#cc0000;" onclick="return confirm('Delete user ${u.employeeCode}?')">[X]</a></td>`;
-            html += '</tr>';
+        for(let user of result) {
+            let lvlStyle = user.securityAccessLevel === 'A' ? "color:red; font-weight:bold;" : "";
+            
+            // STATUS-LOGIK: Vi kollar om lockout inte är 0, null eller false (Access sparar True som -1)
+            let isLocked = (user.lockout != null && user.lockout != 0 && user.lockout != false && String(user.lockout).toLowerCase() !== 'false');
+            let statusText = isLocked ? "<b style='color:red'>LOCKED</b>" : "Active";
+            
+            htmlOutput += `
+            <div class="resp-table-row">
+                <div class="table-body-cell">${user.employeeCode}</div>
+                <div class="table-body-cell-bigger">${user.name || '<i>No name set</i>'}</div>
+                <div class="table-body-cell" style="${lvlStyle}">${user.securityAccessLevel || 'C'}</div>
+                <div class="table-body-cell">${statusText}</div>
+                <div class="table-body-cell" style="text-align:center;">
+                    <a href="/api/userdatabase/edit/${user.employeeCode}" style="color:#0056b3; font-weight:bold; text-decoration:none;">[E]</a>
+                </div>
+                <div class="table-body-cell" style="text-align:center;">
+                    <a href="/api/userdatabase/delete/${user.employeeCode}" style="color:red; text-decoration:none;" onclick="return confirm('Radera?');">[X]</a>
+                </div>
+            </div>`;
         }
-        html += '</table>';
+    } catch (err) { htmlOutput += `Error: ${err.message}`; }
 
-        // ---- Add New User form ----
-        html += '<div id="addForm" style="display:none;margin-top:20px;padding:16px;border:1px solid #003366;width:400px;background:#f5f5f5;">';
-        html += '<h3 style="margin-top:0;">Add New User</h3>';
-        html += '<form method="POST" action="/api/userdatabase">';
-
-        html += 'Username (Max 7):<br>';
-        html += '<input type="text" name="username" maxlength="7" style="width:140px;"> &nbsp; eller &nbsp;';
-
-        // Employee dropdown
-        html += '<select name="employeecode" style="width:130px;"><option value="">-Select-</option>';
-        for (let e of employees) {
-            html += `<option value="${e.employeeCode}">${e.employeeCode}</option>`;
-        }
-        html += '</select><br><br>';
-
-        html += 'Full Name:<br><input type="text" name="fullname" style="width:280px;"><br><br>';
-        html += 'Password (Max 7):<br><input type="password" name="passwd" maxlength="7" style="width:280px;"><br><br>';
-        html += 'Security Level:<br><select name="securitylevel" style="width:280px;">';
-        html += '<option value="C">C (Standard)</option>';
-        html += '<option value="B">B</option>';
-        html += '<option value="A">A (Admin)</option>';
-        html += '</select><br><br>';
-
-        html += '<input type="submit" value="Create User" style="background:#003366;color:#fff;border:none;padding:6px 16px;cursor:pointer;">';
-        html += '</form></div>';
-
-        res.write(html);
-        res.write(htmlinfostop);
-        res.write(htmlbottom);
-        res.end();
-    } catch (err) {
-        console.error('userdatabase GET error:', err);
-        if (!res.headersSent) res.status(500).end('Server error');
-    }
+    htmlOutput += `</div></div>`;
+    response.write(htmlOutput);
+    renderPageBottom(response);
 });
 
-// -------------------- Create user --------------------
-router.post('/', async (req, res) => {
-    if (!req.session.loggedin || req.session.securityAccessLevel !== 'A') {
-        return res.status(403).end('Access denied.');
+// -------------------------------------------------------------------------
+// 2. ROUTE: FORMULÄR FÖR ATT LÄGGA TILL (GET /add)
+// -------------------------------------------------------------------------
+router.get('/add', async (request, response) => {
+    if (!(await hasAccess(request))) return accessDeniedResponse(response);
+    renderPageTop(request, response, "Add User");
+    
+    // Generera IT-koder dynamiskt för rullistan
+    let itCodes = "";
+    for(let i=1; i<=30; i++) { 
+        let c = `IT25-${i.toString().padStart(2,'0')}`; 
+        itCodes += `<option value="${c}">${c}</option>`; 
     }
+    
+    response.write(`
+        <h2>Add User & Profile</h2>
+        <form action="/api/userdatabase/add" method="POST" style="border:1px solid #ccc; padding:20px; width:400px; background:#f9f9f9;">
+            <p>Username (Max 7): <br>
+               <input type="text" name="customUsername" maxlength="7" placeholder="Custom name..."> 
+                eller <select name="itUsername"><option value="">-Välj IT-kod-</option>${itCodes}</select>
+            </p>
+            <p>Full Name (No limit): <br>
+               <input type="text" name="fullName" placeholder="t.ex. Thomas Anderson" style="width:100%;">
+            </p>
+            <p>Password (Max 7): <br>
+               <input type="password" name="password" maxlength="7" required style="width:100%;">
+            </p>
+            <p>Security Level: <br>
+               <select name="securityLevel" style="width:100%;">
+                    <option value="C">C (Standard)</option>
+                    <option value="B">B (Manager)</option>
+                    <option value="A">A (Admin)</option>
+               </select>
+            </p>
+            <button type="submit" style="padding:10px 20px; background:green; color:white; border:none; border-radius:4px; cursor:pointer;">Create User</button>
+        </form>`);
+    renderPageBottom(response);
+});
 
-    // Use custom username if filled, else use selected employee code
-    const employeeCode  = (req.body.username && req.body.username.trim()) ? req.body.username.trim() : req.body.employeecode;
-    const fullname      = req.body.fullname || '';
-    const passwd        = req.body.passwd || '';
-    const securityLevel = req.body.securitylevel || 'C';
+// -------------------------------------------------------------------------
+// 3. ROUTE: PROCESSA TILLÄGG (POST /add)
+// -------------------------------------------------------------------------
+router.post('/add', async (request, response) => {
+    if (!(await hasAccess(request))) return response.send("Denied");
+    
+    // LOGIK FÖR PRECEDENCE:
+    // Om 'customUsername' har ett värde används det, annars används valet från rullistan 'itUsername'.
+    let user = (request.body.customUsername && request.body.customUsername.trim() !== "") 
+               ? request.body.customUsername.trim() 
+               : request.body.itUsername;
+    
+    let name = request.body.fullName || user; // Om fullständigt namn saknas, använd användarnamnet
+    let pass = request.body.password;
+    let lvl = request.body.securityLevel;
 
-    if (!employeeCode) {
-        return res.status(400).end('No username or employee code provided.');
+    // Säkerhetskontroll för längd (Double-check även på serversidan)
+    if (!user || user.length > 7 || pass.length > 7) {
+        return response.send("<h2>Error</h2><p>Username/Pass max 7 chars.</p><a href='javascript:history.back()'>Back</a>");
     }
-
-    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
 
     try {
-        // Check if user already exists
-        const existing = await connection.query(`SELECT employeeCode FROM users WHERE employeeCode='${employeeCode}'`);
-        if (existing.length > 0) {
-            res.writeHead(200, { 'Content-Type': 'text/html' });
-            writeFrame(req, res);
-            res.write('<h2>Error: User already exists. Use Edit to modify an existing user.</h2>');
-            res.write('<a href="/api/userdatabase" style="color:#336699;">Back to User Database</a>');
-            res.write(htmlinfostop);
-            res.write(htmlbottom);
-            return res.end();
+        // DUBBLETTKONTROLL: Kolla om användaren redan finns i databasen
+        let check = await connection.query(`SELECT employeeCode FROM users WHERE employeeCode='${user}'`);
+        if (check.length > 0) {
+            return response.send(`<h2>Error</h2><p>User <b>${user}</b> already exists!</p><a href='javascript:history.back()'>Back</a>`);
         }
 
-        // Insert into users table
-        await connection.execute(`INSERT INTO users (employeeCode, passwd, logintimes) VALUES ('${employeeCode}', '${passwd}', 0)`);
+        // Hasha lösenordet med MD5 (matchar login.js)
+        let hashedPass = crypto.createHash('md5').update(pass).digest('hex');
+        
+        // Utför INSERT i båda tabellerna
+        // 'lockout' sätts till NULL för att kontot ska vara aktivt direkt
+        await connection.execute(`INSERT INTO users (employeeCode, passwd, lockout, logintimes) VALUES ('${user}', '${hashedPass}', NULL, 0)`);
+        await connection.execute(`INSERT INTO employee (employeeCode, [name], securityAccessLevel) VALUES ('${user}', '${name}', '${lvl}')`);
+        
+        response.redirect('/api/userdatabase');
+    } catch (err) { response.send("Error: " + err.message); }
+});
 
-        // If custom username (not from employee table), also insert into employee
-        if (req.body.username && req.body.username.trim()) {
-            const empExists = await connection.query(`SELECT employeeCode FROM employee WHERE employeeCode='${employeeCode}'`);
-            if (empExists.length === 0) {
-                await connection.execute(`INSERT INTO employee (employeeCode, [name], securityAccessLevel) VALUES ('${employeeCode}', '${fullname}', '${securityLevel}')`);
-            }
+// -------------------------------------------------------------------------
+// 4. ROUTE: FORMULÄR FÖR ATT EDITERA (GET /edit/:username)
+// -------------------------------------------------------------------------
+router.get('/edit/:username', async (request, response) => {
+    if (!(await hasAccess(request))) return accessDeniedResponse(response);
+    
+    let user = request.params.username;
+    try {
+        let res = await connection.query(`SELECT users.lockout, employee.[name], employee.securityAccessLevel FROM users LEFT JOIN employee ON users.employeeCode = employee.employeeCode WHERE users.employeeCode='${user}'`);
+        let data = res[0];
+        
+        // Kontrollera om kontot är låst för att förifylla dropdownen korrekt
+        let isLocked = (data.lockout != null && data.lockout != 0 && data.lockout != false && String(data.lockout).toLowerCase() !== 'false');
+
+        renderPageTop(request, response, "Edit User");
+        response.write(`
+            <h2>Edit User: ${user}</h2>
+            <form action="/api/userdatabase/edit/${user}" method="POST" style="border:1px solid #ccc; padding:20px; width:400px;">
+                <p>Full Name: <br>
+                    <input type="text" name="fullName" value="${data.name || ''}" style="width:100%;">
+                </p>
+                <p>Status: <br>
+                    <select name="lockout" style="width:100%;">
+                        <option value="false" ${!isLocked ? 'selected' : ''}>Active (NULL)</option>
+                        <option value="true" ${isLocked ? 'selected' : ''}>Locked (True)</option>
+                    </select>
+                </p>
+                <p>Level: <br>
+                    <select name="securityLevel" style="width:100%;">
+                        <option value="C" ${data.securityAccessLevel==='C'?'selected':''}>C</option>
+                        <option value="B" ${data.securityAccessLevel==='B'?'selected':''}>B</option>
+                        <option value="A" ${data.securityAccessLevel==='A'?'selected':''}>A</option>
+                    </select>
+                </p>
+                <p>New Password (Max 7): <br>
+                    <input type="password" name="password" maxlength="7" placeholder="Leave empty to keep current" style="width:100%;">
+                </p>
+                <button type="submit" style="padding:10px; background:#0056b3; color:white; border:none; border-radius:4px; cursor:pointer;">Save Changes</button>
+            </form>`);
+        renderPageBottom(response);
+    } catch (err) { response.send(err.message); }
+});
+
+// -------------------------------------------------------------------------
+// 5. ROUTE: PROCESSA ÄNDRINGAR (POST /edit/:username)
+// -------------------------------------------------------------------------
+router.post('/edit/:username', async (request, response) => {
+    if (!(await hasAccess(request))) return response.send("Denied");
+    
+    let user = request.params.username;
+    let name = request.body.fullName;
+    // Om status sätts till false skickar vi 'NULL' till SQL för att låsa upp kontot helt
+    let lockValue = (request.body.lockout === 'true') ? 'true' : 'NULL';
+    let lvl = request.body.securityLevel;
+    let newPass = request.body.password;
+
+    try {
+        // Om ett nytt lösenord har skrivits in, hashade och uppdatera det
+        if (newPass && newPass.trim() !== "") {
+            if (newPass.length > 7) return response.send("Error: Pass max 7");
+            let hashedPass = crypto.createHash('md5').update(newPass).digest('hex');
+            await connection.execute(`UPDATE users SET lockout=${lockValue}, passwd='${hashedPass}' WHERE employeeCode='${user}'`);
         } else {
-            // Update security level on existing employee record
-            await connection.execute(`UPDATE employee SET securityAccessLevel='${securityLevel}' WHERE employeeCode='${employeeCode}'`);
+            // Annars uppdatera bara status (lockout)
+            await connection.execute(`UPDATE users SET lockout=${lockValue} WHERE employeeCode='${user}'`);
         }
-
-        res.redirect('/api/userdatabase');
-    } catch (err) {
-        console.error('userdatabase POST error:', err);
-        if (!res.headersSent) res.status(500).end('Server error: ' + err.message);
-    }
+        // Uppdatera profilinformationen i employee-tabellen
+        await connection.execute(`UPDATE employee SET [name]='${name}', securityAccessLevel='${lvl}' WHERE employeeCode='${user}'`);
+        
+        response.redirect('/api/userdatabase');
+    } catch (err) { response.send(err.message); }
 });
 
-// -------------------- Edit user form --------------------
-router.get('/edit/:username', async (req, res) => {
-    if (!req.session.loggedin || req.session.securityAccessLevel !== 'A') {
-        return res.status(403).end('Access denied.');
-    }
-
-    const username   = decodeURIComponent(req.params.username);
-    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
-
+// -------------------------------------------------------------------------
+// 6. ROUTE: RADERA ANVÄNDARE (GET /delete/:username)
+// -------------------------------------------------------------------------
+router.get('/delete/:username', async (request, response) => {
+    if (!(await hasAccess(request))) return accessDeniedResponse(response);
+    
     try {
-        res.writeHead(200, { 'Content-Type': 'text/html' });
-        writeFrame(req, res);
-
-        const users = await connection.query(`SELECT u.employeeCode, u.lockout, e.[name], e.securityAccessLevel FROM users u LEFT JOIN employee e ON u.employeeCode = e.employeeCode WHERE u.employeeCode='${username}'`);
-
-        if (users.length === 0) {
-            res.write('<h2>User not found.</h2>');
-            res.write('<a href="/api/userdatabase" style="color:#336699;">Back</a>');
-            res.write(htmlinfostop);
-            res.write(htmlbottom);
-            return res.end();
-        }
-
-        const u      = users[0];
-        const locked = (u.lockout != null && u.lockout !== '');
-
-        let html = '<link rel="stylesheet" href="css/personnel_registry.css" />';
-        html += '<h2>Edit User</h2>';
-        html += `<form method="POST" action="/api/userdatabase/edit/${encodeURIComponent(username)}" style="padding:16px;border:1px solid #003366;width:360px;background:#f5f5f5;">`;
-
-        html += `Username:<br><input type="text" value="${u.employeeCode}" disabled style="width:280px;background:#ddd;"><br><br>`;
-        html += `Full Name:<br><input type="text" value="${u.name || ''}" disabled style="width:280px;background:#ddd;"><br><br>`;
-
-        html += 'Security Level:<br><select name="securitylevel" style="width:280px;">';
-        for (let lvl of ['A', 'B', 'C']) {
-            const sel = (u.securityAccessLevel === lvl) ? ' selected' : '';
-            html += `<option value="${lvl}"${sel}>${lvl}${lvl==='A'?' (Admin)':lvl==='C'?' (Standard)':''}</option>`;
-        }
-        html += '</select><br><br>';
-
-        html += 'Lock out:<br><select name="lockout" style="width:280px;">';
-        html += `<option value="no"${!locked ? ' selected' : ''}>No</option>`;
-        html += `<option value="yes"${locked  ? ' selected' : ''}>Yes</option>`;
-        html += '</select><br><br>';
-
-        html += 'New Password (leave blank to keep current):<br><input type="password" name="passwd" maxlength="7" style="width:280px;"><br><br>';
-
-        html += '<input type="submit" value="Edit user" style="background:#003366;color:#fff;border:none;padding:6px 16px;cursor:pointer;">';
-        html += '</form>';
-
-        res.write(html);
-        res.write(htmlinfostop);
-        res.write(htmlbottom);
-        res.end();
-    } catch (err) {
-        console.error('userdatabase edit GET error:', err);
-        if (!res.headersSent) res.status(500).end('Server error');
-    }
+        // Radera från båda tabellerna för att hålla databasen ren (Referentiell integritet)
+        await connection.execute(`DELETE FROM users WHERE employeeCode='${request.params.username}'`);
+        await connection.execute(`DELETE FROM employee WHERE employeeCode='${request.params.username}'`);
+        
+        response.redirect('/api/userdatabase');
+    } catch (err) { response.send(err.message); }
 });
 
-// -------------------- Save edit --------------------
-router.post('/edit/:username', async (req, res) => {
-    if (!req.session.loggedin || req.session.securityAccessLevel !== 'A') {
-        return res.status(403).end('Access denied.');
-    }
-
-    const username      = decodeURIComponent(req.params.username);
-    const securityLevel = req.body.securitylevel || 'C';
-    const lockout       = req.body.lockout === 'yes' ? 'locked' : null;
-    const newPasswd     = req.body.passwd || '';
-
-    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
-
-    try {
-        // Update lockout
-        if (lockout === null) {
-            await connection.execute(`UPDATE users SET lockout=Null WHERE employeeCode='${username}'`);
-        } else {
-            await connection.execute(`UPDATE users SET lockout='${lockout}' WHERE employeeCode='${username}'`);
-        }
-
-        // Update password only if a new one was provided
-        if (newPasswd.trim() !== '') {
-            await connection.execute(`UPDATE users SET passwd='${newPasswd}' WHERE employeeCode='${username}'`);
-        }
-
-        // Update security level in employee table
-        await connection.execute(`UPDATE employee SET securityAccessLevel='${securityLevel}' WHERE employeeCode='${username}'`);
-
-        res.redirect('/api/userdatabase');
-    } catch (err) {
-        console.error('userdatabase edit POST error:', err);
-        if (!res.headersSent) res.status(500).end('Server error');
-    }
-});
-
-// -------------------- Delete user --------------------
-router.get('/delete/:username', async (req, res) => {
-    if (!req.session.loggedin || req.session.securityAccessLevel !== 'A') {
-        return res.status(403).end('Access denied.');
-    }
-
-    const username   = decodeURIComponent(req.params.username);
-    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
-
-    try {
-        await connection.execute(`DELETE FROM users WHERE employeeCode='${username}'`);
-        res.redirect('/api/userdatabase');
-    } catch (err) {
-        console.error('userdatabase delete error:', err);
-        if (!res.headersSent) res.status(500).end('Server error');
-    }
-});
-
+// Exportera routern så att den kan användas av huvudservern (app.js)
 module.exports = router;

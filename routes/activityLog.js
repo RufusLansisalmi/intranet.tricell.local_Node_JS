@@ -6,7 +6,7 @@ const path = require('path');
 
 const pug = require('pug');
 const { response } = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu = pug.compileFile('./masterframe/loggedinmenu.html');
 
 //makes so only A and B secrityaccess can edit, delete and add new objects
 const canEdit = (request) => {
@@ -19,12 +19,12 @@ const readHTML = require('../readHTML.js');
 const fs = require('fs');
 const { json } = require('express');
 
-var htmlHead = readHTML('./html/head.html');
-var htmlHeader = readHTML('./html/header.html');
-var htmlMenu = readHTML('./html/menu.html');    
-var htmlInfoStart = readHTML('./html/infoStart.html');
-var htmlInfoStop = readHTML('./html/infoStop.html');
-var htmlBottom = readHTML('./html/bottom.html');
+var htmlHead = readHTML('./masterframe/head.html');
+var htmlHeader = readHTML('./masterframe/header.html');
+var htmlMenu = readHTML('./masterframe/menu.html');    
+var htmlInfoStart = readHTML('./masterframe/infoStart.html');
+var htmlInfoStop = readHTML('./masterframe/infoStop.html');
+var htmlBottom = readHTML('./masterframe/bottom.html');
 
 // ----------------------  -------------------------------
 router.get('/', (request, response) =>
@@ -41,18 +41,19 @@ router.get('/', (request, response) =>
             response.write(htmlHead);
             if(request.session.loggedin)
             {
-                htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html');
+                htmlLoggedinMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');
                 response.write(htmlLoggedinMenuCSS);
-                htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
+                htmlLoggedinMenuJS = readHTML('./masterframe/loggedinmenu_js.html');
                 response.write(htmlLoggedinMenuJS);
                 //htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
                 //response.write(htmlLoggedinMenu);
                 response.write(pug_loggedinmenu({
-                    employeecode: request.cookies.employeecode,
-                    name: request.cookies.name,
-                    logintimes: request.cookies.logintimes,
-                    lastlogin: request.cookies.lastlogin,
-                }));
+                employeecode: request.cookies.employeecode,
+                name: request.cookies.name,
+                logintimes: request.cookies.logintimes,
+                lastlogin: request.cookies.lastlogin,
+                securityaccesslevel: request.session.securityAccessLevel
+              }));
             }
             response.write(htmlHeader);
             response.write(htmlMenu);
@@ -124,17 +125,15 @@ router.get('/', (request, response) =>
             "";
 
             let result;
-            const sortAmount = parseInt(request.cookies.sortAmount) || 20;
-            const sortType = ['ID','Activity','EmployeeCode'].includes(request.cookies.sortType) ? request.cookies.sortType : 'ID';
 
             // Query 1
-            if (sortType == "ID")
+            if (request.cookies.sortType == "ID")
             {
-                result = await connection.query("SELECT TOP "+ sortAmount +" ID, Activity, EmployeeCode, [Name], [Date], [Time] FROM [Log] ORDER BY ID desc");
+                result = await connection.query("SELECT TOP "+ request.cookies.sortAmount +" ID, Activity, EmployeeCode, Name, Date, Time FROM Log ORDER BY "+ request.cookies.sortType +" desc");
             }
             else
             {
-                result = await connection.query("SELECT TOP "+ sortAmount +" ID, Activity, EmployeeCode, [Name], [Date], [Time] FROM [Log] ORDER BY "+ sortType +" desc, ID desc");
+                result = await connection.query("SELECT TOP "+ request.cookies.sortAmount +" ID, Activity, EmployeeCode, Name, Date, Time FROM Log ORDER BY "+ request.cookies.sortType +" desc, ID desc");
             }
 
             // Ta reda på antalet virus
@@ -181,9 +180,9 @@ router.get('/', (request, response) =>
         response.write(htmlHead);
         if(request.session.loggedin)
         {
-            htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html');
+            htmlLoggedinMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');
             response.write(htmlLoggedinMenuCSS);
-            htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
+            htmlLoggedinMenuJS = readHTML('./masterframe/loggedinmenu_js.html');
             response.write(htmlLoggedinMenuJS);
             //htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
             //response.write(htmlLoggedinMenu);
@@ -225,9 +224,9 @@ router.get('/:id', (request, response) =>
 
         if(request.session.loggedin)
         {
-            htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html');
+            htmlLoggedinMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');
             response.write(htmlLoggedinMenuCSS);
-            htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
+            htmlLoggedinMenuJS = readHTML('./masterframe/loggedinmenu_js.html');
             response.write(htmlLoggedinMenuJS);
             //htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
             //response.write(htmlLoggedinMenu);
@@ -245,12 +244,12 @@ router.get('/:id', (request, response) =>
 
         if(canEdit(request))  // check permissions first
         {
-            const result = await connection.query("SELECT ID FROM [Log] WHERE ID=" + deleteID);
-
+            const result = await connection.query("SELECT ID FROM Log WHERE ID=" + deleteID);
+            
             if(result.length > 0)
             {
                 // delete record - note: deleteResult not result
-                const deleteResult = await connection.execute("DELETE FROM [Log] WHERE ID=" + deleteID);
+                const deleteResult = await connection.execute("DELETE FROM Log WHERE ID=" + deleteID);
                 response.write("Activity log deleted.<br />");
                 response.write("<a href=\"http://localhost:3000/api/activitylog\" style=\"color:#336699;\">Back to Activity Log</a>");
             }

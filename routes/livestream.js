@@ -3,6 +3,9 @@ const router = express.Router();
 const fs = require('fs');
 const path = require('path');
 const readHTML = require('../readHTML.js');
+const pug = require('pug');
+const { response } = require('express');
+const pug_loggedinmenu = pug.compileFile('./masterframe/loggedinmenu.html');
 
 // Hjälpfunktion för att hämta XML-värden
 function getXmlValue(content, tag) {
@@ -51,10 +54,26 @@ router.get('/', (request, response) => {
     }
 
     // Skicka HTML-delar
-    response.write(readHTML('./html/head.html'));
-    response.write(readHTML('./html/header.html'));
-    response.write(readHTML('./html/menu_back.html'));
-    response.write(readHTML('./html/infostart.html'));
+    response.write(readHTML('./masterframe/head.html'));
+    response.write(readHTML('./masterframe/header.html'));
+    response.write(readHTML('./masterframe/menu.html'));
+    if(request.session.loggedin)
+    {
+        htmlLoggedinMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');
+        response.write(htmlLoggedinMenuCSS);
+        htmlLoggedinMenuJS = readHTML('./masterframe/loggedinmenu_js.html');
+        response.write(htmlLoggedinMenuJS);
+        //htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
+        //response.write(htmlLoggedinMenu);
+        response.write(pug_loggedinmenu({
+            employeecode: request.cookies.employeecode,
+            name: request.cookies.name,
+            logintimes: request.cookies.logintimes,
+            lastlogin: request.cookies.lastlogin,
+            securityaccesslevel: request.session.securityAccessLevel,
+        }));
+    }
+    response.write(readHTML('./masterframe/infostart.html'));
 
     let htmloutput = `
     <style>
@@ -172,8 +191,8 @@ router.get('/', (request, response) => {
     `;
 
     response.write(htmloutput);
-    response.write(readHTML('./html/infostop.html'));
-    response.write(readHTML('./html/bottom.html'));
+    response.write(readHTML('./masterframe/infostop.html'));
+    response.write(readHTML('./masterframe/bottom.html'));
     response.end();
 });
 

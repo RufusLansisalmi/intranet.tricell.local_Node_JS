@@ -1,133 +1,195 @@
 const express = require('express');
 const router = express.Router();
+
 var cookieParser = require('cookie-parser');
 router.use(cookieParser());
-const ADODB = require('node-adodb');
-var fs = require('fs');
+
+router.use(express.static('./public'));
 const path = require('path');
-const readHTML = require('../readHTML');
-router.use(express.static('public'));
+
 const pug = require('pug');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const { response } = require('express');
+const pug_loggedinmenu = pug.compileFile('./masterframe/loggedinmenu.html');
 
-var htmlhead = readHTML('html/head.html');
-var htmlheader = readHTML('html/header.html');
-var htmlmenu = readHTML('html/menu.html');
-var htmlinfostart = readHTML('html/infostart.html');
-var htmlinfostop = readHTML('html/infostop.html');
-var htmlbottom = readHTML('html/bottom.html');
+//read masterframe
+const readHTML = require('../readHTML.js');
+var fs = require('fs');
 
-router.get('/', (req, res) => {
-    const employeeid = req.query.femployeecode;
-    const passwd = req.query.fpassword;
-    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
+var htmlHead = readHTML('./masterframe/head.html');
+var htmlHeader = readHTML('./masterframe/header.html');
+var htmlMenu = readHTML('./masterframe/menu.html');
+var htmlInfoStart = readHTML('./masterframe/infostart.html');
+var htmlInfoStop = readHTML('./masterframe/infostop.html');
+var htmlBottom = readHTML('./masterframe/bottom.html');
 
-    async function sqlQuery() {
-        const result = await connection.query("SELECT passwd, logintimes, lastlogin, lockout FROM users WHERE employeeCode='" + employeeid + "'");
-        if (result == "") {
-            res.redirect('/api/login/unsuccessful');
-        } else {
-            str_passwd = result[0]['passwd'];
-            str_logintimes = result[0]['logintimes'];
-            str_lastlogin = result[0]['lastlogin'];
-            str_lockout = result[0]['lockout'];
+//router
+router.get('/', (request, response) =>
+{
+    //recive variables
+    const employeecode = request.query.femployeecode;
+    const password = request.query.fpassword;
 
-            async function sqlQuery3() {
-                const result3 = await connection.query("SELECT name, securityAccessLevel FROM employee WHERE employeeCode='" + employeeid + "'");
-                str_name = result3[0]['name'];
-                req.session.securityAccessLevel = result3[0]['securityAccessLevel'];
+    //opens database
+    const ADODB = require('node-adodb');
+    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb');
 
-                if (str_lockout == null) {
-                    if (str_passwd == passwd) {
-                        req.session.loggedin = true;
-                        req.session.username = employeeid;
-                        int_logintimes = parseInt(str_logintimes) + 1;
+    async function sqlQuery()
+    {
+	    const result = await connection.query("SELECT passwd, lastlogin, logintimes, lockout FROM users WHERE employeecode='"+employeecode+"'");
+        if(result=="")
+            {
+                response.redirect('/api/login/unsuccessful');
+            }
+            else
+            {
+                //read all user varables
+                str_password = result[0]['passwd'];
+                str_lastlogin = result[0]['lastlogin'];
+                str_logintimes = result[0]['logintimes'];
+                if(str_logintimes==""){str_logintimes="0";};
+
+                async function sqlQuery3()
+                {
+                    const result3 = await connection.query("SELECT name, securityaccesslevel FROM employee WHERE employeecode='"+employeecode+"'");
+                    str_name = result3[0]['name'];
+                    str_securityaccesslevel = result3[0]['securityaccesslevel'];
+                                    str_lockout = result[0]['lockout'];
+                //see if user is locked out
+                if(str_lockout==null)
+                {
+                    if(str_password==password)
+                    {
+                        //start session
+                        request.session.loggedin = true;
+                        request.session.username = employeecode;
+                        request.session.securityAccessLevel = str_securityaccesslevel;
+
+                        //update database
+                        let int_logintimes = parseInt(str_logintimes)+1;
                         let ts = Date.now();
                         let date_ob = new Date(ts);
-                        str_lastlogin = date_ob.getDate() + "." + (date_ob.getMonth() + 1) + "." + date_ob.getFullYear();
+                        let date = date_ob.getDate();
+                        let month = date_ob.getMonth()+1;
+                        let year = date_ob.getFullYear();
+                        str_lastlogin = date + "." + month + "." + year;
 
-                        res.cookie('employeecode', employeeid);
-                        res.cookie('name', str_name);
-                        res.cookie('lastlogin', str_lastlogin);
-                        res.cookie('logintimes', int_logintimes);
+                        //create cookies
+                        response.cookie('employeecode', employeecode);
+                        response.cookie('name', str_name);
+                        response.cookie('lastlogin', str_lastlogin);
+                        response.cookie('logintimes', int_logintimes);
 
-                        res.cookie("sortAmount", 20);
-                        res.cookie("sortType", "ID");
+                        // Create sorting settings cookies
+                        response.cookie("sortAmount", 20);
+                        response.cookie("sortType", "ID");
 
-                        async function sqlQuery2() {
-                            await connection.execute("UPDATE users SET logintimes='" + int_logintimes + "', lastlogin='" + str_lastlogin + "' WHERE employeeCode='" + employeeid + "'");
-
-                            const logConnection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/activity_log.mdb;');
-                            let ts2 = Date.now();
-                            let d = new Date(ts2);
-                            let loginDate = d.getDate() + "." + (d.getMonth() + 1) + "." + d.getFullYear();
-                            let timeOfLogin = d.getHours() + ":" + String(d.getMinutes()).padStart(2, '0');
-                            await logConnection.execute("INSERT INTO [Log] (EmployeeCode, [Name], [Date], [Time], Activity) VALUES ('" + employeeid + "', '" + str_name + "', '" + loginDate + "', '" + timeOfLogin + "', 'Login')");
-                            await logConnection.execute("DELETE FROM [Log] WHERE ID NOT IN (SELECT TOP 150 ID FROM [Log] ORDER BY ID DESC)");
+                        //update database               
+                        async function sqlQuery2()
+                        {
+                            const result2 = await connection.execute("UPDATE users SET logintimes='"+int_logintimes+"', lastlogin='"+str_lastlogin+"' WHERE employeecode='"+employeecode+"'");
+                            request.session.save(() => {
+                            response.redirect('/api/login/successful');
+                            });
                         }
                         sqlQuery2();
-                        res.redirect('/api/personnelregistry/' + employeeid);
-                    } else {
-                        res.redirect('/api/login/unsuccessful');
-                    }
-                } else {
-                    res.redirect('/api/login/unsuccessful');
+
+                        //response.redirect('/api/login/successful');
+                }
+                else
+                {   
+                    response.redirect('/api/login/unsuccessful');
                 }
             }
-            sqlQuery3();
+            else
+            {
+                response.redirect('/api/login/unsuccessful');
+            }
+                }
+                sqlQuery3();
         }
     }
-    sqlQuery().catch(err => { console.error('login error:', err); if (!res.headersSent) res.status(500).end('Server error'); });
+	sqlQuery();
 });
 
-router.get('/:successful', (req, res) => {
-    res.setHeader('Content-type', 'text/html');
-    res.write(htmlhead);
-    res.write(htmlheader);
-    res.write(htmlmenu);
-    res.write(htmlinfostart);
-    if (req.session.loggedin) { var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
-    if (req.session.loggedin) { var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-    if (req.session.loggedin) {
-        res.write(pug_loggedinmenu({ employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel }));
-    }
-    if (req.session.loggedin) {
-        res.write("Login successful<br /><p />");
-    } else {
-        res.write("Login unsuccessful<br /><p />");
-    }
-    const logConnection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/activity_log.mdb;');
-    const deleteRow150 = logConnection.execute("DELETE FROM [Log] WHERE ID NOT IN (SELECT TOP 150 ID FROM [Log] ORDER BY ID DESC)");
-   // getting dat of login
-   let ts = Date.now();
-    let date_ob = new Date(ts);
-    let date = date_ob.getDate();
-    let month = date_ob.getMonth() + 1;
-    let year = date_ob.getFullYear();
-    let loginDate = date + "." + month + "." + year;
-    //getting time of login
-    let hourOFLogin = date_ob.getHours();
-    let minuteOfLogin = date_ob.getMinutes();
-    let timeOfLogin = hourOFLogin + ":" + minuteOfLogin;
+//router for succesful login
+router.get('/:successful', function(request, response) 
+{
+    const ADODB = require('node-adodb');
+    const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/activity_log.mdb');
 
-    const updateLog = logConnection.execute("INSERT INTO [Log] (EmployeeCode, [Name], [Date], [Time], Activity) VALUES ('" + req.cookies.employeecode + "', '" + req.cookies.name + "', '" + loginDate + "', '" + timeOfLogin + "', 'Login')");
-   
-   
-    res.write(htmlinfostop);
-    res.write(htmlbottom);
-    res.end();
+    async function activityLog()
+    {
+        //writes masterframe top
+        response.write(htmlHead);
+        response.write(htmlHeader);
+        response.write(htmlMenu);
+        response.write(htmlInfoStart);
+
+        if(request.session.loggedin==true){var htmlLoggedInMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');response.write(htmlLoggedInMenuCSS);}
+        if(request.session.loggedin==true){var htmlLoggedInMenuJS = readHTML('./masterframe/loggedinmenu_js.html');response.write(htmlLoggedInMenuJS);}
+        //if(request.session.loggedin==true){var htmlLoggedInMenu = readHTML('./masterframe/loggedinmenu.html');response.write(htmlLoggedInMenu);}
+        if(request.session.loggedin)
+        {
+            response.write(pug_loggedinmenu({
+                employeecode: request.cookies.employeecode,
+                name: request.cookies.name,
+                logintimes: request.cookies.logintimes,
+                lastlogin: request.cookies.lastlogin,
+                securityaccesslevel: request.session.securityAccessLevel
+              }));
+        }
+
+        if(request.session.loggedin)
+        {
+            response.write('Login successful!');
+
+            const deleteRow150 = connection.execute("DELETE FROM Log WHERE ID NOT IN (SELECT TOP 150 ID FROM Log ORDER BY ID ASC)");
+
+            // Getting date of login
+            let ts = Date.now();
+            let date_ob = new Date(ts);
+            let date = date_ob.getDate();
+            let month = date_ob.getMonth()+1;
+            let year = date_ob.getFullYear();
+            let loginDate = date + "." + month + "." + year;
+            // Getting time of login
+            let hourOfLogin = date_ob.getHours();
+            let minuteOfLogin = date_ob.getMinutes();
+            let timeOfLogin = hourOfLogin + ":" + minuteOfLogin;
+
+
+            const updateLog = connection.execute("INSERT INTO Log (Activity, EmployeeCode, [Name], [Date], [Time]) " +
+                "VALUES (\"Login\", \""+ request.cookies.employeecode +"\", \""+ request.cookies.name +"\", \""+ loginDate +"\", \""+ timeOfLogin +"\")");
+        }
+        else
+        {
+            response.write('Login unsuccessful!');  
+        }
+
+        //wtites master frame bottom
+        response.write(htmlInfoStop);
+        response.write(htmlBottom);
+        response.end()
+
+    }
+    activityLog();
 });
 
-router.get('/:unsuccessful', (req, res) => {
-    res.setHeader('Content-type', 'text/html');
-    res.write(htmlhead);
-    res.write(htmlheader);
-    res.write(htmlmenu);
-    res.write(htmlinfostart);
-    res.write("Login unsuccessful<br /><p />");
-    res.write(htmlinfostop);
-    res.write(htmlbottom);
-    res.end();
+//router for unsuccessful login
+router.get('/:unsuccessful', function(request, response) 
+{
+    //writes masterframe top
+    response.write(htmlHead);
+    response.write(htmlHeader);
+    response.write(htmlMenu);
+    response.write(htmlInfoStart);
+
+    response.write('Login unsuccessful!');
+
+    //wtites master frame bottom
+    response.write(htmlInfoStop);
+    response.write(htmlBottom);
+    response.end()
 });
 
 module.exports = router;

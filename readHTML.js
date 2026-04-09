@@ -1,14 +1,16 @@
- var fs = require('fs');
+var fs = require('fs');
+
 function readHTML(htmlfile)
 {
-    let htmltext = '';
-    try {
-        htmltext = fs.readFileSync(htmlfile, 'utf8');
-    }
-  catch (err) {
-    console.error(`Error reading file from disk: ${err}`);
+ try 
+  {
+     var htmltext = fs.readFileSync(htmlfile) 
+  } 
+  catch (err) 
+  {
+    console.error(err);
   }
-   return htmltext;
+  return htmltext;
 }
-
 module.exports = readHTML;
+

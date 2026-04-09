@@ -1,121 +1,141 @@
+/* ----------------------------- 3:rd party-moduler ------------------------------ */
+const config = require('./config/globals.json');
 const express = require('express');
-const app = express();
 const session = require('express-session');
 const bodyParser = require('body-parser');
 
+const app = express();                  /* Skapa webbserver-objektet */
 
+const path = require('path');
+// Tell Express where your templates are stored (usually a folder named "views")
+app.set('views', path.join(__dirname, 'public'));
 
-const pug = require('pug');
-const {response} = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+// Tell Express to use EJS as the rendering engine
+app.set('view engine', 'ejs');
 
-app.use(session({secret: 'thisisasecret', saveUninitialized: true, resave: true})); 
-app.use(bodyParser.urlencoded({extended : true}));
-app.use(bodyParser.json());
+app.use(express.static('./public'));    /* Skapa global path till "public"-mappen */
 
 var cookieParser = require('cookie-parser');
 app.use(cookieParser());
 
+app.use(
+    session({
+    secret: 'thisisasecret',
+    saveUninitialized: true,
+    resave: false
+    }));
 
-//läser in routers
+app.use(bodyParser.json());
+app.use(
+bodyParser.urlencoded({
+extended: true
+}));
+
+const pug = require('pug');
+const { response } = require('express');
+const pug_loggedinmenu = pug.compileFile('./masterframe/loggedinmenu.html');
+
+/* ------------------------------ Egna moduler ----------------------------------- */
+const readHTML = require('./readHTML.js');
+
+    /* Läs respektive HTML-text-sida för Masterframen */
+    var htmlHead = readHTML('./masterframe/head.html');
+    var htmlHeader = readHTML('./masterframe/header.html');
+    var htmlMenu = readHTML('./masterframe/menu.html');
+    var htmlInfoStart = readHTML('./masterframe/infoStart.html');
+    var htmlIndex = readHTML('./public/text/index.html');
+    var htmlInfoStop = readHTML('./masterframe/infoStop.html');
+    var htmlFooter = readHTML('./masterframe/footer.html');
+    var htmlBottom = readHTML('./masterframe/bottom.html');
+
+
+/* ------------- Skapa routes för de alternativa rutterna i webbapplikationen ------------------------- */
+
 const info = require('./routes/info');
+const personnelregistry = require('./routes/personnelregistry');
 const login = require('./routes/login');
 const logout = require('./routes/logout');
-const personnelRegistry = require('./routes/personnelregistry');
-const virusDatabase = require('./routes/virusdatabase');
-const newEmployee = require('./routes/newemployee');
-const editEmployee = require('./routes/editemployee');
-const deleteEmployee = require('./routes/deleteemployee');
+const virusdatabase = require('./routes/virusdatabase');
+const newemployee = require('./routes/newemployee');
+const deleteemployee = require('./routes/deleteemployee');
+const editemployee = require('./routes/editemployee');
 const getchat = require('./routes/getchat');
 const chat = require('./routes/chat');
 const newvirus = require('./routes/newvirus');
 const editvirus = require('./routes/editvirus');
 const deletevirus = require('./routes/deletevirus');
-const entries = require('./routes/entries');
-const fileuploadvirus = require('./routes/fileuploadvirus');
-const editvirusimage = require('./routes/editvirusimage');
-const panic = require('./routes/panic');
-const activityLog = require('./routes/activityLog');
+const entries = require("./routes/entries.js");
 const userdatabase = require('./routes/userdatabase');
-const livestream = require('./routes/livestream');
-
-
-//läser in MAster-frame
- var fs = require('fs');
- const path = require('path');
-
-const readHTML = require('./readHTML');
-app.use(express.static(path.join(__dirname, 'public')));
+const panic = require('./routes/panic');
+const editvirusimage = require('./routes/editvirusimage');
+const livestream = require('./routes/livestream.js');
+const fileUploadRouter = require('./routes/fileuploadvirus.js');
+const activityLog = require('./routes/activityLog');
 
 
 
-var htmlhead = readHTML('html/head.html');
-var htmlheader = readHTML('html/header.html');
-var htmlmenu = readHTML('html/menu.html');
-var htmlinfostart = readHTML('html/infostart.html');
-var htmlinfostop = readHTML('html/infostop.html');
-var htmlbottom = readHTML('html/bottom.html');
 
-//deafualt router
-app.get('/', (req, res) =>
+
+
+/* -------------- Skapa default-router (om ingen under-sökväg anges av användaren) --------------------- */
+app.get('/', function(request, response)
 {
-    //utskrift av master-frame
-    res.write(htmlhead);
-    res.write(htmlheader);
-    if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
-    if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-   // if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-    if(req.session.loggedin){
-    res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
-}
-    res.write(htmlmenu);
-    res.write(htmlinfostart);
+    const infotext = request.params.infotext;
+    
+    response.setHeader('Content-type','text/html');
+    response.write(htmlHead);
 
-    var htmlinfo = readHTML('./text/index.html');
-    res.write(htmlinfo);
+    if(request.session.loggedin)
+    {
+        htmlLoggedinMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');
+        response.write(htmlLoggedinMenuCSS);
+        htmlLoggedinMenuJS = readHTML('./masterframe/loggedinmenu_js.html');
+        response.write(htmlLoggedinMenuJS);
+        //htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
+        //response.write(htmlLoggedinMenu);
+        response.write(pug_loggedinmenu({
+                employeecode: request.cookies.employeecode,
+                name: request.cookies.name,
+                logintimes: request.cookies.logintimes,
+                lastlogin: request.cookies.lastlogin,
+                securityaccesslevel: request.session.securityAccessLevel
+              }));
+    }
 
-
-    //utskrift av master-frame nedre del
-    res.write(htmlinfostop);
-    res.write(htmlbottom);
-
-    res.end();
-
+    response.write(htmlHeader);
+    response.write(htmlMenu);
+    response.write(htmlInfoStart);
+    htmlInfo = readHTML('./public/text/index.html');
+    response.write(htmlInfo);    
+    response.write(htmlInfoStop);
+    response.write(htmlFooter);
+    response.write(htmlBottom);
+    response.end();
 });
 
+
 app.use('/api/info', info);
+app.use('/api/personnelregistry', personnelregistry);
 app.use('/api/login', login);
 app.use('/api/logout', logout);
-app.use('/api/personnelregistry', personnelRegistry);
-app.use('/api/virus', virusDatabase)
-app.use('/api/newemployee', newEmployee);
-app.use('/api/editemployee', editEmployee);
-app.use('/api/deleteemployee', deleteEmployee);
+app.use('/api/virusdatabase', virusdatabase);
+app.use('/api/newemployee', newemployee);
+app.use('/api/deleteemployee', deleteemployee);
+app.use('/api/editemployee', editemployee);
 app.use('/api/getchat', getchat);
 app.use('/api/chat', chat);
-
 app.use('/api/newvirus', newvirus);
 app.use('/api/editvirus', editvirus);
 app.use('/api/deletevirus', deletevirus);
 app.use('/api/entries', entries);
-app.use('/api/fileuploadvirus', fileuploadvirus);
-app.use('/api/editvirusimage', editvirusimage);
-app.use('/api/panic', panic);
-app.use('/api/activitylog', activityLog);
 app.use('/api/userdatabase', userdatabase);
+app.use('/api/panic', panic);
+app.use('/api/editvirusimage', editvirusimage);
 app.use('/api/livestream', livestream);
+app.use('/api/data', fileUploadRouter);
+app.use('/api/activitylog', activityLog);
 
 
-const server = app.listen(3000, () =>
-{
-    console.log('Server is running on http://localhost:3000');
-});
-
-server.on('error', (err) => {
-    if (err.code === 'EADDRINUSE') {
-        console.error('Error: Port 3000 is already in use. Kill the existing process and try again.');
-    } else {
-        console.error('Server error:', err.message);
-    }
-    process.exit(1);
-});
+/* ---------------------------------- Starta webbservern ------------------------------ */
+const port = process.env.PORT || 3000;
+app.listen(port, ()=> console.log(`Listening on port ${port}... `));

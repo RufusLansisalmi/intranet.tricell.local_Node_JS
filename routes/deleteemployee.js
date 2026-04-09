@@ -1,75 +1,91 @@
 const express = require('express');
 const router = express.Router();
 
-var cookieParser = require('cookie-parser');
-router.use(cookieParser());
-
- var fs = require('fs');
- const path = require('path');
-
-const readHTML = require('../readHTML');
-router.use(express.static('public'));
+router.use(express.static('./public'));
+const path = require('path');
 
 const pug = require('pug');
-const {response} = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const { response } = require('express');
+const pug_loggedinmenu = pug.compileFile('./masterframe/loggedinmenu.html');
+
+// --------------------- Läs in Masterframen --------------------------------
+const readHTML = require('../readHTML.js');
+const fs = require('fs');
+
+    var htmlHead = readHTML('./masterframe/head.html');
+    var htmlHeader = readHTML('./masterframe/header.html');
+    var htmlMenu = readHTML('./masterframe/menu.html');    
+    var htmlInfoStart = readHTML('./masterframe/infoStart.html');
+    var htmlInfoStop = readHTML('./masterframe/infoStop.html');
+    var htmlFooter = readHTML('./masterframe/footer.html');
+    var htmlBottom = readHTML('./masterframe/bottom.html');
+
+    var htmlLoggedinMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');
+    var htmlLoggedinMenuJS = readHTML('./masterframe/loggedinmenu_js.html');
+    var htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
 
 
-
-var htmlhead = readHTML('html/head.html');
-var htmlheader = readHTML('html/header.html');
-var htmlmenu = readHTML('html/menu.html');
-var htmlinfostart = readHTML('html/infostart.html');
-var htmlinfostop = readHTML('html/infostop.html');
-var htmlbottom = readHTML('html/bottom.html');
-
-
-router.get('/:id', (req, res) =>
+// ---------------------- Radera person ------------------------------------------------
+router.get('/:id', function(request, response)
 {
- 
-    const id = req.params.id;
+    const id = parseInt(request.params.id);
 
     // Öppna databasen
     const ADODB = require('node-adodb');
     const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
 
-     async function sqlQuery()
+    async function sqlQuery()
     {
-    
-
-
-    res.write(htmlhead);
-    res.write(htmlheader);
-    if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
-    if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-    //if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-      if(req.session.loggedin){
-        res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
-    }
-    res.write(htmlmenu);
-    res.write(htmlinfostart);
-      if(req.session.loggedin)
+        response.setHeader('Content-type','text/html');
+        response.write(htmlHead);
+        if(request.session.loggedin)
         {
+            response.write(htmlLoggedinMenuCSS);
+            response.write(htmlLoggedinMenuJS);
+            //response.write(htmlLoggedinMenu);
+            response.write(pug_loggedinmenu({
+                employeecode: request.cookies.employeecode,
+                name: request.cookies.name,
+                logintimes: request.cookies.logintimes,
+                lastlogin: request.cookies.lastlogin,
+                securityaccesslevel: request.session.securityAccessLevel
+              }));
+        }
+        response.write(htmlHeader);
+        response.write(htmlMenu);
+        response.write(htmlInfoStart);
+
+        if(request.session.loggedin)
+        {
+
+            // Ta reda på användarens employeecode (för att kunna radera bilden)
+            const result = await connection.query("SELECT employeeCode FROM employee WHERE id="+id+"");
+            let employeecode = "" + result[0]['employeeCode'];
+
             // Skicka SQL-query till databasen 
-const result = await connection.execute(`DELETE FROM employee WHERE id = ${id}`);
-          
+            const result2 = await connection.execute("DELETE FROM employee WHERE id="+id+"");
+
+            // Radera bilden
+            const path = "./public/photos/"+str_employeeCode+".jpg";
+            if(fs.existsSync(path))
+            {
+                fs.unlinkSync(path)
+            }
+            
             // Ge respons till användaren
-            res.write("Employee deleted successfully");
+            response.write("Employee deleted<br/><p /><a href=\"http://localhost:3000/api/personnelregistry\" style=\"color:#336699;text-decoration:none;\">Delete another employee</a>");
         }
         else
         {
-            res.write("Not logged in");
+            response.write("Not logged in");
         }
 
-
-  
-   
-    res.write(htmlinfostop);
-    res.write(htmlbottom);
-
-    res.end();
- }
-    sqlQuery().catch(err => { console.error('deleteemployee error:', err); if (!res.headersSent) res.status(500).end('Server error'); });
+        response.write(htmlInfoStop);
+        response.write(htmlFooter);
+        response.write(htmlBottom);
+        response.end();
+    }
+    sqlQuery();
 });
 
 

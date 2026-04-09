@@ -1,80 +1,188 @@
 const express = require('express');
 const router = express.Router();
-const ADODB = require('node-adodb');
+const bodyParser = require('body-parser');
+var formidable = require('formidable');
 
+router.use(bodyParser.json());
+router.use(bodyParser.urlencoded({ extended: false }));
+
+router.use(express.static('./public'));
+const path = require('path');
+
+const pug = require('pug');
+const { response } = require('express');
+const pug_loggedinmenu = pug.compileFile('./masterframe/loggedinmenu.html');
+
+// --------------------- Läs in Masterframen --------------------------------
 const readHTML = require('../readHTML.js');
+const fs = require('fs');
 
-var htmlhead = readHTML('html/head.html');
-var htmlheader = readHTML('html/header.html');
-var htmlmenu = readHTML('html/menu.html');
-var htmlinfostart = readHTML('html/infostart.html');
-var htmlinfostop = readHTML('html/infostop.html');
-var htmlbottom = readHTML('html/bottom.html');
+var htmlHead = readHTML('./masterframe/head.html');
+var htmlHeader = readHTML('./masterframe/header.html');
+var htmlMenu = readHTML('./masterframe/menu.html');
+var htmlInfoStart = readHTML('./masterframe/infoStart.html');
+var htmlInfoStop = readHTML('./masterframe/infoStop.html');
+var htmlFooter = readHTML('./masterframe/footer.html');
+var htmlBottom = readHTML('./masterframe/bottom.html');
 
-router.get('/', (req,res)=>{
+var htmlLoggedinMenuCSS = readHTML('./masterframe/loggedinmenu_css.html');
+var htmlLoggedinMenuJS = readHTML('./masterframe/loggedinmenu_js.html');
+var htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
+const ADODB = require('node-adodb');
+const connection2 = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/personnelregistry.mdb;');
 
-res.write(htmlhead);
-res.write(htmlheader);
-res.write(htmlmenu);
-res.write(htmlinfostart);
+// ---------------------- Lägg till ny person ------------------------------------------------
+router.post('/', function(request, response)
+{
 
-let html = `
-<h2>Add Research Object</h2>
+        // Array för vilka access levels som krävs, går att expandera
+        const validAccessLevels = ["B", "A"];
+        if(request.session.loggedin && validAccessLevels.includes(request.session.securityAccessLevel))
+        {
+            // Ta emot variablerna från formuläret
+            var form = new formidable.IncomingForm();
+            form.parse(request, function (err, fields, files) 
+            {
+                var virusNumber = fields.objectCode;
+                var virusName = fields.objectName;
+                var virusText = fields.objectText;
+                var datasheet = fields.objectDatasheet;
+                var presentation = fields.objectPresentation;
+                var safety = fields.objectHandling;
 
-<form method="POST">
+                var creator = request.cookies.employeecode;
+                // Skapa inskrivningsdatumn
+                let ts = Date.now();
+                let date_ob = new Date(ts);
+                let date = date_ob.getDate();
+                let month = date_ob.getMonth() + 1;
+                let year = date_ob.getFullYear();
+                let createdDate = date+"."+month+"."+year;
+                let hours = date_ob.getHours();
+                if(hours < 10)
+                {
+                    hours = "0" + hours;
+                }
+                let minutes = date_ob.getMinutes();
+                let createdTime = hours + ":" + minutes;
 
-Object Number:<br>
-<input type="text" name="objectNumber"><br>
+                // Öppna databasen
+                const ADODB = require('node-adodb');
+                const connection = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb;');
 
-Object Name:<br>
-<input type="text" name="objectName"><br>
+                async function sqlQuery()
+                {
+                    response.setHeader('Content-type','text/html');
+                    response.write(htmlHead);
+                    if(request.session.loggedin)
+                    {
+                        response.write(htmlLoggedinMenuCSS);
+                        response.write(htmlLoggedinMenuJS);
+                        //response.write(htmlLoggedinMenu);
+                        response.write(pug_loggedinmenu({
+                            employeecode: request.cookies.employeecode,
+                            name: request.cookies.name,
+                            logintimes: request.cookies.logintimes,
+                            lastlogin: request.cookies.lastlogin,
+                            securityaccesslevel: request.session.securityAccessLevel
+                        }));
+                    }
+                    response.write(htmlHeader);
+                    response.write(htmlMenu);
+                    response.write(htmlInfoStart);
 
-Creator:<br>
-<input type="text" name="objectCreator"><br>
+                    if(request.session.loggedin)
+                    {
+                        objectStatus = "open";
+                        // Skicka SQL-query till databasen 
+                        const result = await connection.execute("INSERT INTO ResearchObjects (objectNumber,objectName,objectCreator,objectCreatedDate,objectCreatedTime,objectText,objectStatus,presentationVideoLink,securityVideoLink) VALUES ('"+virusNumber+"','"+virusName+"','"+creator+"','"+createdDate+"','"+createdTime+"','"+virusText+"','"+objectStatus+"','"+presentation+"','"+safety+"')");
 
-Created Date:<br>
-<input type="text" name="objectCreatedDate"><br>
+                        // Ladda upp filen
+                        if(files.objectDatasheet.originalFilename != "")
+                        {
+                            var oldpath = files.objectDatasheet.filepath;
+                            var newpath = path.resolve(__dirname, "../data/safetydatasheets/"+virusNumber+".pdf");
+                            fs.renameSync(oldpath, newpath, function (err) 
+                            {
+                            if (err) throw err;
+                            });
+                        }
 
-Status:<br>
-<input type="text" name="objectStatus"><br><br>
+                        // Ge respons till användaren
+                        response.write("Virus added<br/><p /><a href=\"http://localhost:3000/api/newvirus\" style=\"color:#336699;text-decoration:none;\">Add another object</a>");
+                    }
+                    else
+                    {
+                        response.write("Not logged in");
+                    }
 
-<input type="submit" value="Save">
+                    response.write(htmlInfoStop);
+                    response.write(htmlFooter);
+                    response.write(htmlBottom);
+                    response.end();
+                }
+                sqlQuery();
 
-</form>
-`;
+            });
+        }
+        else
+        {
+            response.write(htmlHeader);
+            response.write(htmlMenu);
+            response.write(htmlInfoStart);
+            response.write("Not logged in or not enough security clearance");
+            response.write(htmlInfoStop);
+            response.write(htmlFooter);
+            response.write(htmlBottom);
+            response.end();
+        }
 
-res.write(html);
-
-res.write(htmlinfostop);
-res.write(htmlbottom);
-res.end();
+   
 
 });
 
-router.post('/', (req,res)=>{
+// ---------------------- Formulär för att lägga till ny person ------------------------------
+router.get('/', (request, response) =>
+{   
+    response.setHeader('Content-type','text/html');
+    response.write(htmlHead);
+    if(request.session.loggedin)
+    {
+        response.write(htmlLoggedinMenuCSS);
+        response.write(htmlLoggedinMenuJS);
+        //response.write(htmlLoggedinMenu);
+        response.write(pug_loggedinmenu({
+                employeecode: request.cookies.employeecode,
+                name: request.cookies.name,
+                logintimes: request.cookies.logintimes,
+                lastlogin: request.cookies.lastlogin,
+                securityaccesslevel: request.session.securityAccessLevel
+              }));
+    }
+    response.write(htmlHeader);
+    response.write(htmlMenu);
+    response.write(htmlInfoStart);
 
-const connection = ADODB.open(
-'Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./data/mdb/researchdata.mdb'
-);
-
-async function insert(){
-
-await connection.execute(`
-INSERT INTO ResearchObjects
-(objectNumber,objectName,objectCreator,objectCreatedDate,objectStatus)
-VALUES
-('${req.body.objectNumber}',
-'${req.body.objectName}',
-'${req.body.objectCreator}',
-'${req.body.objectCreatedDate}',
-'${req.body.objectStatus}')
-`);
-
-res.redirect('/api/virus');
-
-}
-
-insert();
+    
+    // Array för vilka access levels som krävs, går att expandera
+    const validAccessLevels = ["B", "A"];
+    if(request.session.loggedin && validAccessLevels.includes(request.session.securityAccessLevel))
+    {
+        htmlNewEmployeeCSS = readHTML('./masterframe/newvirus_css.html');
+        response.write(htmlNewEmployeeCSS);
+        htmlNewEmployeeJS = readHTML('./masterframe/newvirus_js.html');
+        response.write(htmlNewEmployeeJS);
+        htmlNewEmployee = readHTML('./masterframe/newvirus.html'); 
+        response.write(htmlNewEmployee);
+    }
+    else
+    {
+        response.write("Not logged in or not enough security clearance");
+    }
+    response.write(htmlInfoStop);
+    response.write(htmlFooter);
+    response.write(htmlBottom);
+    response.end();
 
 });
 
