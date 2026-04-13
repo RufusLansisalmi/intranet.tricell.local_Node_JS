@@ -71,7 +71,7 @@ router.get('/', (req, res) =>
          "<tr>"+
             "<td class=\"infolight\" width=\"130\">"+str_employeeCode+"</td>"+
             
-            "<td class=\"infodark\" width=\"210\"> &nbsp;<a href=\"http://localhost:3000/api/personnelregistry/"+str_employeeCode+"\">"+str_name+"</a></td>"+
+            "<td class=\"infodark\" width=\"210\"> &nbsp;<a href=\"/api/personnelregistry/"+str_employeeCode+"\">"+str_name+"</a></td>"+
             
             "<td class=\"infolight\" width=\"130\">"+str_signatureDate+" </td>"+
             "<td class=\"infolight\" width=\"130\">"+str_rank+"</td>"+

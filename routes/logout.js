@@ -34,9 +34,6 @@ router.get('/', (req, res) =>
     res.writeHead(200, {'Content-Type': 'text/html'});
     res.write(htmlhead);
     res.write(htmlheader);
-   // if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
-   // if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-   // if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
     res.write(htmlmenu);
     res.write(htmlinfostart);
 

@@ -11,7 +11,7 @@ const path = require('path');
 
 const pug = require('pug');
 const { response } = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 const pug_editemployee = pug.compileFile('./html/editemployee.html');
 
 
@@ -25,12 +25,10 @@ var htmlHeader = readHTML('./html/header.html');
 var htmlMenu = readHTML('./html/menu.html');
 var htmlInfoStart = readHTML('./html/infoStart.html');
 var htmlInfoStop = readHTML('./html/infoStop.html');
-var htmlFooter = readHTML('./html/footer.html');
 var htmlBottom = readHTML('./html/bottom.html');
 
 var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html');
 var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
-var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html');
 var htmlVirusimagesCSS = readHTML('./html/virusimages_css.html');
 
 router.get('/deletevirusimage/:virusId/:imageNumber', function(request, response) {
@@ -44,13 +42,6 @@ router.get('/deletevirusimage/:virusId/:imageNumber', function(request, response
         {
             response.write(htmlLoggedinMenuCSS);
             response.write(htmlLoggedinMenuJS);
-            //response.write(htmlLoggedinMenu);
-            response.write(pug_loggedinmenu({
-                employeecode: request.cookies.employeecode,
-                name: request.cookies.name,
-                logintimes: request.cookies.logintimes,
-                lastlogin: request.cookies.lastlogin,
-              }));
         }
         response.write(htmlHeader);
         response.write(htmlMenu);
@@ -89,9 +80,12 @@ router.get('/deletevirusimage/:virusId/:imageNumber', function(request, response
             response.write('<p style="font-size:18px; color:red;">Unauthorized</p>'); 
         }
         response.write(`<p style="font-size:18px; color:green;">Image deleted successfully</p>`);
-        response.write(`<a href="http://localhost:3000/api/editvirus/${virusId}" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#007BFF; color:#fff; text-decoration:none; border-radius:5px;">Back to Edit Virus</a>`);
-        response.write(htmlInfoStop);
-        response.write(htmlFooter);
+        response.write(`<a href="/api/editvirus/${virusId}" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#007BFF; color:#fff; text-decoration:none; border-radius:5px;">Back to Edit Virus</a>`);
+        if(request.session.loggedin){
+            response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+        } else {
+            response.write(htmlInfoStop);
+        }
         response.write(htmlBottom);
         response.end();
     }
@@ -112,13 +106,6 @@ router.post('/newvirusimage/:id', function(request, response) {
                 {
                     response.write(htmlLoggedinMenuCSS);
                     response.write(htmlLoggedinMenuJS);
-                    //response.write(htmlLoggedinMenu);
-                    response.write(pug_loggedinmenu({
-                        employeecode: request.cookies.employeecode,
-                        name: request.cookies.name,
-                        logintimes: request.cookies.logintimes,
-                        lastlogin: request.cookies.lastlogin,
-                    }));
                 }
                 response.write(htmlHeader);
                 response.write(htmlMenu);
@@ -152,10 +139,13 @@ router.post('/newvirusimage/:id', function(request, response) {
                 }
                 //Ge respons till användaren
                 response.write(`<p style="font-size:18px; color:green;">Image uploaded successfully</p>`);
-                response.write(`<a href="http://localhost:3000/api/editvirus/${virusId}" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#007BFF; color:#fff; text-decoration:none; border-radius:5px;">Back to Edit Virus</a>`);
+                response.write(`<a href="/api/editvirus/${virusId}" style="display:inline-block; margin-top:20px; padding:10px 20px; background-color:#007BFF; color:#fff; text-decoration:none; border-radius:5px;">Back to Edit Virus</a>`);
 
-                response.write(htmlInfoStop);
-                response.write(htmlFooter);
+                if(request.session.loggedin){
+                    response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+                } else {
+                    response.write(htmlInfoStop);
+                }
                 response.write(htmlBottom);
                 response.end();
             }
@@ -169,8 +159,11 @@ router.post('/newvirusimage/:id', function(request, response) {
         response.write(htmlMenu);
         response.write(htmlInfoStart);
         response.write('<h1>Unauthorized</h1><p>You must be logged in with appropriate permissions to upload images.</p>');
-        response.write(htmlInfoStop);
-        response.write(htmlFooter);
+        if(request.session.loggedin){
+            response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+        } else {
+            response.write(htmlInfoStop);
+        }
         response.write(htmlBottom);
         response.end();
     }

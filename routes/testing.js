@@ -60,7 +60,7 @@ router.get('/', (request, response) =>
         // Lägg till respektive employee till utskrift-variabeln
         htmlOutput += "<div class=\"resp-table-row\">\n";
         htmlOutput += "<div class=\"table-body-cell\">" + str_employeeCode + "</div>\n";
-        htmlOutput += "<div class=\"table-body-cell-bigger\"><a href=\"http://localhost:3000/api/personnelregistry/" + str_employeeCode + "\">" + str_name + "</a></div>\n";
+        htmlOutput += "<div class=\"table-body-cell-bigger\"><a href=\"/api/personnelregistry/" + str_employeeCode + "\">" + str_name + "</a></div>\n";
         htmlOutput += "<div class=\"table-body-cell\"> " + str_signatureDate + "</div>\n";
         htmlOutput += "<div class=\"table-body-cell\"> " + str_rank + "</div>\n";
         htmlOutput += "<div class=\"table-body-cell\"> " + str_securityAccessLevel + "</div>\n";

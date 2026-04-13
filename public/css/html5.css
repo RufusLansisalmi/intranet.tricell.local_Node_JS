@@ -1,0 +1,310 @@
+/*===========================================================================
+  html5.css - HTML5 Semantic Layout for Tricell Laboratories Master Frame
+  Based on Övning 8 layout, adapted for Node.js master frame system
+===========================================================================*/
+
+body
+{
+    margin: 0px;
+    background-color: #ffffff;
+    font-family: Arial, "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 12px;
+    color: #000000;
+}
+a:link { color: #ffffff; text-decoration: none;}
+a:active { color: #aad037; text-decoration: none;}
+a:visited { color: #ffffff; text-decoration: none;}
+a:hover { color: #aad037; text-decoration: none;}
+
+/*-------------------------- VIDEO BACKGROUND -----------------------------*/
+video#bgvideo
+{
+	position: absolute;
+	z-index: 1;
+	width: 100%;
+	height: 300px;
+	object-fit: cover;
+}
+
+/*-------------------------- HEADER -----------------------------*/
+#mainheader
+{
+	height: 300px;
+	width: 100%;
+	position: relative;
+	z-index: 10;
+}
+#header-top
+{
+	height: 30px;
+	line-height: 30px;
+	background-color: #385723;
+	text-align: center;
+	font-family: arial;
+	font-size: 14px;
+	font-weight: bold;
+	color: white;
+}
+#header-middle
+{
+	position: relative;
+	height: 270px;
+}
+
+#logo
+{
+	margin-left: 100px;
+	position: absolute;
+	top: 50%;
+	transform: translate(0,-50%);
+	float: left;
+}
+#socialnav
+{
+	position: absolute;
+	left: 50%;
+	transform: translate(-50%,0);
+	top: 10px;
+	float: left;
+}
+#socialnav a img
+{
+	transition: transform 0.2s ease;
+}
+#socialnav a img:hover
+{
+	transform: scale(1.15);
+}
+
+/*-------------------------- MAIN MENU (topnav) -----------------------------*/
+#topnav
+{
+	position: relative;
+	background-color: black;
+	height: 50px;
+	width: 100%;
+	clear: both;
+	z-index: 100;
+}
+ul.topmenu
+{
+	position: absolute;
+	left: 50%;
+	transform: translate(-50%,0);
+	padding: 0;
+	margin: 0;
+	height: 50px;
+}
+ul.dropdownmenu
+{
+	visibility: hidden;
+	position: absolute;
+	padding: 0;
+	margin: 0;
+	z-index: 200;
+}
+li.topitem
+{
+	margin-top: 2px;
+	margin-bottom: 2px;
+	background-color: #385723;
+	display: inline;
+	height: 42px;
+	line-height: 42px;
+	padding-left: 30px;
+	padding-right: 30px;
+	float: left;
+	border: 2px solid black;
+}
+li.dropdownitem
+{
+	background-color: #385723;
+	display: inline;
+	height: 42px;
+	line-height: 42px;
+	padding-left: 30px;
+	padding-right: 30px;
+	border: 1px solid black;
+}
+#topnav li a
+{
+	font-family: arial;
+	font-size: 12px;
+	font-weight: bold;
+	color: white;
+	text-decoration: none;
+}
+li.topitem:hover
+{
+	background-color: #7aa65d;
+}
+li.dropdownitem:hover
+{
+	background-color: #7aa65d;
+}
+li.topitem:hover ul.dropdownmenu
+{
+	visibility: visible;
+}
+li.topitem:hover li.dropdownitem
+{
+	visibility: visible;
+	display: block;
+}
+
+/*-------------------------- MAIN CONTENT AREA -----------------------------*/
+main
+{
+	margin-top: 20px;
+	margin-left: auto;
+	margin-right: auto;
+	width: 920px;
+	background-color: white;
+}
+article
+{
+	width: 700px;
+	padding: 5px;
+	padding-bottom: 30px;
+	font-family: arial;
+	font-size: 12px;
+	color: black;
+	float: left;
+}
+article a:link, article a:visited { color: #385723; }
+article a:hover { color: #7aa65d; }
+
+.featuredimage
+{
+	width: 100%;
+	max-width: 690px;
+	height: auto;
+}
+
+h1
+{
+	font-family: arial;
+	font-size: 12px;
+	color: black;
+}
+h2
+{
+	font-family: arial;
+	font-size: 14px;
+	color: black;
+}
+
+/*-------------------------- RIGHT SIDEBAR (aside) -------------------------*/
+aside
+{
+	width: 200px;
+	float: right;
+}
+aside form
+{
+	border: 1px black solid;
+	padding-top: 10px;
+	padding-left: 10px;
+	padding-bottom: 0px;
+	margin: 10px;
+	margin-top: 20px;
+	font-size: 10px;
+	background-color: white;
+	color: black;
+}
+aside .button
+{
+	border: 1px solid black;
+	background-color: #dddddd;
+	font-size: 10px;
+}
+aside input[type=text], aside input[type=password]
+{
+	padding: 5px 5px;
+	box-sizing: border-box;
+	border: 1px solid black;
+	background-color: #dddddd;
+	font-size: 10px;
+}
+#rightnav
+{
+	margin-top: 20px;
+}
+ul.rightmenu
+{
+    border: 1px black solid;
+    padding-top: 10px;
+    padding-left: 10px;
+    padding-bottom: 0px;
+    margin: 10px;
+    font-size: 10px;
+    background-color: white;
+    list-style: none;
+}
+li.rightitem
+{
+	list-style-type: none;
+	margin-bottom: 10px;
+	background-color: #385723;
+	height: 30px;
+	width: 150px;
+	line-height: 30px;
+	text-align: center;
+	border: 2px solid black;
+}
+li.rightitem:hover
+{
+	background: #7aa65d;
+}
+
+/*-------------------------- FOOTER -----------------------------*/
+footer
+{
+	clear: both;
+	width: 100%;
+	height: 200px;
+	margin-top: 20px;
+	background-color: black;
+}
+
+#footercontainer
+{
+	margin-top: 50px;
+	margin-left: auto;
+	margin-right: auto;
+	width: 920px;
+}
+.footersection
+{
+	width: 210px;
+	margin: 10px;
+	float: left;
+	font-family: arial;
+	font-size: 14px;
+	color: white;
+	text-align: center;
+	background-color: black;
+}
+footer h3
+{
+	font-family: arial;
+	font-size: 14px;
+	color: #eeef86;
+}
+
+/*-------------------------- INFODIV (legacy compatibility) -----------------*/
+.infodiv
+{
+	width: 100%;
+	padding: 0;
+	text-align: left;
+	vertical-align: top;
+	font-size: 14px;
+}
+
+/*--- Logged-in menu should sit above the topnav ---*/
+#loggedinpanel
+{
+	position: relative;
+	z-index: 50;
+}

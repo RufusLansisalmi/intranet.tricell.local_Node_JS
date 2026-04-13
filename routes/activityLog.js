@@ -6,7 +6,7 @@ const path = require('path');
 
 const pug = require('pug');
 const { response } = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 
 //makes so only A and B secrityaccess can edit, delete and add new objects
 const canEdit = (request) => {
@@ -45,14 +45,6 @@ router.get('/', (request, response) =>
                 response.write(htmlLoggedinMenuCSS);
                 htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
                 response.write(htmlLoggedinMenuJS);
-                //htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
-                //response.write(htmlLoggedinMenu);
-                response.write(pug_loggedinmenu({
-                    employeecode: request.cookies.employeecode,
-                    name: request.cookies.name,
-                    logintimes: request.cookies.logintimes,
-                    lastlogin: request.cookies.lastlogin,
-                }));
             }
             response.write(htmlHeader);
             response.write(htmlMenu);
@@ -160,7 +152,7 @@ router.get('/', (request, response) =>
                 htmlOutput += "<div class=\"table-body-cell\"> " + str_time + "</div>\n";
                 if(canEdit(request))
                 {
-                    htmlOutput += "<div class=\"table-body-cell\"><a href=\"http://localhost:3000/api/activitylog/" + str_id + "\" style=\"color:red;text-decoration:none;\">D</a></div>\n"; // Gör till knapp
+                    htmlOutput += "<div class=\"table-body-cell\" style=\"text-align:center;\"><a href=\"/api/activitylog/" + str_id + "\" class=\"icon_delete\" title=\"Delete\">&#10005;</a></div>\n";
                 }
                 htmlOutput += "</div>\n";
             }  
@@ -168,7 +160,11 @@ router.get('/', (request, response) =>
             htmlOutput += "</div></div>\n\n";
             response.write(htmlOutput); // Skriv ut XML-datat
 
-            response.write(htmlInfoStop);
+            if(request.session.loggedin){
+                response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+            } else {
+                response.write(htmlInfoStop);
+            }
 
             response.write(htmlBottom);
             response.end();
@@ -185,14 +181,6 @@ router.get('/', (request, response) =>
             response.write(htmlLoggedinMenuCSS);
             htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
             response.write(htmlLoggedinMenuJS);
-            //htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
-            //response.write(htmlLoggedinMenu);
-            response.write(pug_loggedinmenu({
-                employeecode: request.cookies.employeecode,
-                name: request.cookies.name,
-                logintimes: request.cookies.logintimes,
-                lastlogin: request.cookies.lastlogin,
-            }));
         }
         response.write(htmlHeader);
         response.write(htmlMenu);
@@ -202,7 +190,11 @@ router.get('/', (request, response) =>
 
         response.write(htmlOutput);
 
-        response.write(htmlInfoStop);
+        if(request.session.loggedin){
+            response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+        } else {
+            response.write(htmlInfoStop);
+        }
 
         response.write(htmlBottom);
         response.end();
@@ -229,14 +221,6 @@ router.get('/:id', (request, response) =>
             response.write(htmlLoggedinMenuCSS);
             htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
             response.write(htmlLoggedinMenuJS);
-            //htmlLoggedinMenu = readHTML('./masterframe/loggedinmenu.html');
-            //response.write(htmlLoggedinMenu);
-            response.write(pug_loggedinmenu({
-                employeecode: request.cookies.employeecode,
-                name: request.cookies.name,
-                logintimes: request.cookies.logintimes,
-                lastlogin: request.cookies.lastlogin,
-            }));
         }
 
         response.write(htmlHeader);
@@ -252,7 +236,7 @@ router.get('/:id', (request, response) =>
                 // delete record - note: deleteResult not result
                 const deleteResult = await connection.execute("DELETE FROM [Log] WHERE ID=" + deleteID);
                 response.write("Activity log deleted.<br />");
-                response.write("<a href=\"http://localhost:3000/api/activitylog\" style=\"color:#336699;\">Back to Activity Log</a>");
+                response.write("<a href=\"/api/activitylog\" style=\"color:#336699;\">Back to Activity Log</a>");
             }
             else
             {
@@ -263,8 +247,12 @@ router.get('/:id', (request, response) =>
         {
             response.write("You are not authorised to do this.");
         }
-    
-        response.write(htmlInfoStop);
+
+        if(request.session.loggedin){
+            response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+        } else {
+            response.write(htmlInfoStop);
+        }
         response.write(htmlBottom);
         response.end();
     }

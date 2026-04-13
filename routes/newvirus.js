@@ -2,6 +2,12 @@ const express = require('express');
 const router = express.Router();
 const ADODB = require('node-adodb');
 
+var cookieParser = require('cookie-parser');
+router.use(cookieParser());
+
+const pug = require('pug');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
+
 const readHTML = require('../readHTML.js');
 
 var htmlhead = readHTML('html/head.html');
@@ -15,10 +21,13 @@ router.get('/', (req,res)=>{
 
 res.write(htmlhead);
 res.write(htmlheader);
+if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
+if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
 res.write(htmlmenu);
 res.write(htmlinfostart);
 
 let html = `
+<div class="page-container">
 <h2>Add Research Object</h2>
 
 <form method="POST">
@@ -41,11 +50,16 @@ Status:<br>
 <input type="submit" value="Save">
 
 </form>
+</div>
 `;
 
 res.write(html);
 
-res.write(htmlinfostop);
+if(req.session.loggedin){
+    res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+} else {
+    res.write(htmlinfostop);
+}
 res.write(htmlbottom);
 res.end();
 

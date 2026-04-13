@@ -38,7 +38,7 @@
         var elem = document.getElementById('chatLayer');
         elem.scrollTop = elem.scrollHeight;
     }
-    xhttp2.open("GET","http://localhost:3000/api/chat",true);
+    xhttp2.open("GET","/api/chat",true);
     xhttp2.send()
     }
 
@@ -63,7 +63,7 @@
     {
 
         var http = new XMLHttpRequest();
-        http.open("POST", "http://localhost:3000/api/chat", true);
+        http.open("POST", "/api/chat", true);
         http.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
         var params = "MAX_FILE_SIZE=50000000&chatmessage=" + document.getElementById('chatmessage').value;
         http.send(params);
@@ -86,7 +86,7 @@
            {
 	            document.getElementById("chatnumber").innerHTML = this.responseText;
            }
-           xhttp.open("GET","http://localhost:3000/api/getchat",true);
+           xhttp.open("GET","/api/getchat",true);
            xhttp.send();
 
         }, 3000); //3 seconds
@@ -121,7 +121,7 @@ function submitPanic()
     var hashedCode = hex_md5(code);
 
     var http = new XMLHttpRequest();
-    http.open("POST", "http://localhost:3000/api/panic", true);
+    http.open("POST", "/api/panic", true);
     http.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
     http.send("paniccode=" + encodeURIComponent(hashedCode));
 
@@ -135,7 +135,7 @@ function submitPanic()
         {
             // Vänta 2 sekunder (2000 ms) så att man hinner se meddelandet, och skicka sedan användaren till index-sidan
             setTimeout(function() {
-                window.location.href = "http://localhost:3000";
+                window.location.href = "/";
             }, 2000);
         }
     }

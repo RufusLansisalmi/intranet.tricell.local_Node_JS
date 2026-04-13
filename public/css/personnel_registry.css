@@ -1,6 +1,6 @@
 #personnel
 {
-	width: 716px;
+	width: 680px;
 	padding: 0px;
 	border: 1px solid;
 	border-color: #000000;
@@ -152,7 +152,7 @@ td.valuecol
 }
 #table-resp
 {
-	width: 716px;
+	width: 680px;
 	display: table;
 	font-size: 12px;
 	font-family : Arial, Verdana, Geneva, Helvetica, sans-serif;
@@ -210,4 +210,37 @@ td.valuecol
 	padding: 5px;
 	color: #ffffff;
 	font-size: 16px;
+}
+
+/* Green circle icon buttons for edit, delete, add */
+.icon_edit,
+.icon_delete,
+.icon_add {
+	background-color: #acc666;
+	border: 1px solid #000;
+	border-radius: 50%;
+	width: 22px;
+	height: 22px;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	cursor: pointer;
+	font-size: 11px;
+	text-decoration: none;
+	color: #000;
+	line-height: 1;
+}
+.icon_edit:hover,
+.icon_delete:hover,
+.icon_add:hover {
+	background-color: #7aa65d;
+}
+
+/* Outer container for individual detail/form pages */
+.page-container {
+	border: 1px solid #000000;
+	padding: 15px;
+	background-color: #ffffff;
+	max-width: 680px;
+	margin-bottom: 20px;
 }

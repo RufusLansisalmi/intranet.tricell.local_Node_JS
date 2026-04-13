@@ -12,7 +12,7 @@ router.use(express.static(__dirname + '/..'));
 
 const pug = require('pug');
 const {response} = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 
 
 
@@ -26,22 +26,22 @@ var htmlbottom = readHTML('html/bottom.html');
 
 router.get('/', (req, res) =>
 {
-    
+
     res.write(htmlhead);
     res.write(htmlheader);
     if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
     if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-    //if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-      if(req.session.loggedin){
-        res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
-    }
     res.write(htmlmenu);
     res.write(htmlinfostart);
 
     var htmlinfo = readHTML('./text/index.html');
     res.write(htmlinfo);
 
-    res.write(htmlinfostop);
+    if(req.session.loggedin){
+        res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+    } else {
+        res.write(htmlinfostop);
+    }
     res.write(htmlbottom);
 
     res.end();
@@ -65,14 +65,9 @@ router.get('/:infotext', (req, res) =>
     res.write(htmlheader);
     if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
     if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-   // if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-    if(req.session.loggedin){
-    res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
-}
     res.write(htmlmenu);
     res.write(htmlinfostart);
 
-   // var htmlinfo = readHTML('./public/text/index.html');
    const filepath = path.resolve(__dirname, '..', 'text', infotext + '.html');
     if(fs.existsSync(filepath)) {
          htmlinfo = readHTML(filepath);
@@ -82,7 +77,11 @@ router.get('/:infotext', (req, res) =>
 
     res.write(htmlinfo);
 
-    res.write(htmlinfostop);
+    if(req.session.loggedin){
+        res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+    } else {
+        res.write(htmlinfostop);
+    }
     res.write(htmlbottom);
 
     res.end();

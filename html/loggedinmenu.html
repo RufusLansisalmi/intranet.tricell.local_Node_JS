@@ -21,7 +21,7 @@
 
     <table border="0" cellspacing="0" cellpadding="0"><tr><td height="1" width="150" bgcolor="#003366"></td></tr></table>
 
-    <div class="loggedinbutton"><a href="http://localhost:3000/api/userdatabase" style="color:#336699;text-decoration:none;">User Database</a></div>
+    <div class="loggedinbutton"><a href="/api/userdatabase" style="color:#336699;text-decoration:none;">User Database</a></div>
 
     <table border="0" cellspacing="0" cellpadding="0"><tr><td height="1" width="150" bgcolor="#003366"></td></tr></table>
 
@@ -68,15 +68,15 @@
 </div>
     <table border="0" cellspacing="0" cellpadding="0"><tr><td height="1" width="150" bgcolor="#003366"></td></tr></table>
     <div class="loggedinbutton">
-        <a href="http://localhost:3000/api/livestream" style="color:#336699;text-decoration:none;">Virus Livestream</a>
+        <a href="/api/livestream" style="color:#336699;text-decoration:none;">Virus Livestream</a>
     </div>
     <table border="0" cellspacing="0" cellpadding="0"><tr><td height="1" width="150" bgcolor="#003366"></td></tr></table>
     <div class="loggedinbutton">
-        <a href="http://localhost:3000/api/logout" style="color:#336699;text-decoration:none;">Log out</a>
+        <a href="/api/logout" style="color:#336699;text-decoration:none;">Log out</a>
 </div>
 
  <div class="loggedinbutton">
-        <a href="http://localhost:3000/api/activitylog" style="color:#336699;text-decoration:none;">Activity Log</a>
+        <a href="/api/activitylog" style="color:#336699;text-decoration:none;">Activity Log</a>
 </div>
 
 <table border="0" cellspacing="0" cellpadding="0"><tr><td height="1" width="150" bgcolor="#003366"></td></tr></table>
@@ -128,7 +128,7 @@ script.
         document.getElementById('hqStatusText').style.color = '#2a7a2a';
         document.getElementById('hqStatusText').innerText = 'Connected';
         var link = document.getElementById('researchDbLink');
-        link.href = 'http://localhost:3000/api/virus';
+        link.href = '/api/virus';
         link.style.color = '#336699';
         link.style.cursor = 'pointer';
     }

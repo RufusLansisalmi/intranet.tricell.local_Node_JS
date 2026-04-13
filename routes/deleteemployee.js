@@ -12,7 +12,7 @@ router.use(express.static('public'));
 
 const pug = require('pug');
 const {response} = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 
 
 
@@ -42,10 +42,6 @@ router.get('/:id', (req, res) =>
     res.write(htmlheader);
     if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
     if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-    //if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-      if(req.session.loggedin){
-        res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
-    }
     res.write(htmlmenu);
     res.write(htmlinfostart);
       if(req.session.loggedin)
@@ -64,7 +60,11 @@ const result = await connection.execute(`DELETE FROM employee WHERE id = ${id}`)
 
   
    
-    res.write(htmlinfostop);
+    if(req.session.loggedin){
+        res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+    } else {
+        res.write(htmlinfostop);
+    }
     res.write(htmlbottom);
 
     res.end();

@@ -11,7 +11,7 @@ const path = require('path');
 
 const pug = require('pug');
 const { response } = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 
 
 // --------------------- Läs in Masterframen --------------------------------
@@ -27,7 +27,6 @@ var htmlBottom = readHTML('./html/bottom.html');
 
 var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html');
 var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
-var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html');
 
 // ---------------------- Lägg till ny person ------------------------------------------------
 router.post('/', function(request, response)
@@ -94,14 +93,6 @@ router.post('/', function(request, response)
         {
             response.write(htmlLoggedinMenuCSS);
             response.write(htmlLoggedinMenuJS);
-            //response.write(htmlLoggedinMenu);
-            response.write(pug_loggedinmenu({
-                employeecode: request.cookies.employeecode,
-                name: request.cookies.name,
-                logintimes: request.cookies.logintimes,
-                lastlogin: request.cookies.lastlogin,
-                securityAccessLevel: request.session.securityAccessLevel,
-              }));
         }
         response.write(htmlHeader);
         response.write(htmlMenu);
@@ -109,7 +100,7 @@ router.post('/', function(request, response)
 
         if(request.session.loggedin)
         {
-            // Skicka SQL-query till databasen 
+            // Skicka SQL-query till databasen
 const result = await connection.execute(`
     INSERT INTO employee (
      employeecode,
@@ -168,8 +159,12 @@ if(files.ffile.originalFilename != "")
             response.write("Not logged in");
         }
 
-        response.write(htmlInfoStop);
-        
+        if(request.session.loggedin){
+            response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+        } else {
+            response.write(htmlInfoStop);
+        }
+
         response.write(htmlBottom);
         response.end();
     }
@@ -186,13 +181,6 @@ router.get('/', (request, response) =>
     {
         response.write(htmlLoggedinMenuCSS);
         response.write(htmlLoggedinMenuJS);
-        //response.write(htmlLoggedinMenu);
-        response.write(pug_loggedinmenu({
-            employeecode: request.cookies.employeecode,
-            name: request.cookies.name,
-            logintimes: request.cookies.logintimes,
-            lastlogin: request.cookies.lastlogin,
-          }));
     }
     response.write(htmlHeader);
     response.write(htmlMenu);
@@ -205,8 +193,10 @@ router.get('/', (request, response) =>
         response.write(htmlNewEmployeeCSS);
         htmlNewEmployeeJS = readHTML('./html/newemployee_js.html');
         response.write(htmlNewEmployeeJS);
+        response.write('<div class="page-container">');
         htmlNewEmployee = readHTML('./html/newemployee.html');
         response.write(htmlNewEmployee);
+        response.write('</div>');
     
 
 
@@ -215,7 +205,11 @@ router.get('/', (request, response) =>
     {
         response.write("Not logged in");
     }
-    response.write(htmlInfoStop);
+    if(request.session.loggedin){
+        response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+    } else {
+        response.write(htmlInfoStop);
+    }
     response.write(htmlBottom);
     response.end();
 });

@@ -6,6 +6,12 @@ const fs = require('fs');
 const readHTML = require('../readHTML.js');
 const checkAuth = require('../authMiddleweare.js');
 
+var cookieParser = require('cookie-parser');
+router.use(cookieParser());
+
+const pug = require('pug');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
+
 // Multer storage — saves to data/<virusId>/attachments/
 const storage = multer.diskStorage({
     destination: function (req, file, cb) {
@@ -76,6 +82,8 @@ router.get('/:id', checkAuth, (req, res) => {
     res.writeHead(200, { 'Content-Type': 'text/html' });
     res.write(htmlhead);
     res.write(htmlheader);
+    if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
+    if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
     res.write(htmlmenu);
     res.write(htmlinfostart);
 
@@ -91,7 +99,11 @@ router.get('/:id', checkAuth, (req, res) => {
     html += getAttachmentsHTML(safeId);
 
     res.write(html);
-    res.write(htmlinfostop);
+    if(req.session.loggedin){
+        res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+    } else {
+        res.write(htmlinfostop);
+    }
     res.write(htmlbottom);
     res.end();
 });

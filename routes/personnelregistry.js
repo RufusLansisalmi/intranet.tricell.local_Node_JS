@@ -15,7 +15,7 @@ const readHTML = require('../readHTML.js');
 
  const pug = require('pug');
  const {response} = require('express');
- const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+ const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
  
 
 //läs in Masterframe
@@ -46,10 +46,6 @@ router.get('/', (req, res) =>
     	res.write(htmlheader);
         if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
         if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-       // if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-        if(req.session.loggedin){
-    res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
-}
     	res.write(htmlmenu);
     	res.write(htmlinfostart);
 
@@ -65,7 +61,7 @@ htmloutput +="<h2>Personnel Registry:</h2>\n";
 
 htmloutput +="</td><td width=\"350\" align=\"right\">";
 
-htmloutput +="<a href=\"http://localhost:3000/api/newemployee\" style=\"color:#336699;text-decoration:none;\">Add new employee</a>";
+htmloutput +="<a href=\"/api/newemployee\" class=\"icon_add\" title=\"Add\" style=\"font-size:14px;vertical-align:middle;\">&#43;</a> <a href=\"/api/newemployee\" style=\"color:#336699;text-decoration:none;\">Add new employee</a>";
 
 htmloutput +="</td></tr></table>";
 
@@ -80,15 +76,15 @@ htmloutput +="<h2>Personnel Registry:</h2>\n";
 htmloutput += '' +
     "<table id=\"personnel\">"+
         "<tr>"+
-           "<td class=\"infoheadinglight\" width=\"130\"> EMPLOYEE CODE  </td>"+
-            
-           "<td class=\"infoheadingdark\" width=\"210\"> &nbsp; NAME </td>"+
-            
-           "<td class=\"infoheadinglight\" width=\"130\"> SIGNATURE DATE </td>"+
-        
-            "<td class=\"infoheadinglight\" width=\"130\"> RANK </td>"+
-            
-            "<td class=\"infoheadinglight\" width=\"112\"> ACCESS LEVEL</td>";
+           "<td class=\"infoheadinglight\" width=\"120\"> EMPLOYEE CODE  </td>"+
+
+           "<td class=\"infoheadingdark\" width=\"200\"> &nbsp; NAME </td>"+
+
+           "<td class=\"infoheadinglight\" width=\"120\"> SIGNATURE DATE </td>"+
+
+            "<td class=\"infoheadinglight\" width=\"120\"> RANK </td>"+
+
+            "<td class=\"infoheadinglight\" width=\"100\"> ACCESS LEVEL</td>";
        
         if(req.session.loggedin)
 
@@ -104,7 +100,7 @@ htmloutput += '' +
         "";
 
 		try {
-			const result = await connection.query('SELECT id, employeeCode AS employeecode, name, signatureDate AS signaturedate, rank, securitylevel FROM employee');
+			const result = await connection.query('SELECT id, employeeCode AS employeecode, [name], signatureDate AS signaturedate, [rank], securityAccessLevel AS securitylevel FROM employee');
 			var count = result.length;
 			let i;
 			for (i = 0; i < count; i++) {
@@ -115,22 +111,22 @@ htmloutput += '' +
 				str_rank = result[i]['rank'];
 				str_securitylevel = result[i]['securitylevel'] || result[i]['securitylevel'];
 
-				 htmloutput += 
+				 htmloutput +=
          "<tr>"+
-            "<td class=\"infolight\" width=\"130\">"+str_employeecode+"</td>"+
-            
-            "<td class=\"infodark\" width=\"210\"> &nbsp;<a href=\"http://localhost:3000/api/personnelregistry/"+str_employeecode+"\">"+str_name+"</a></td>"+
-            
-            "<td class=\"infolight\" width=\"130\">"+str_signatureDate+" </td>"+
-            "<td class=\"infolight\" width=\"130\">"+str_rank+"</td>"+
+            "<td class=\"infolight\" width=\"120\">"+str_employeecode+"</td>"+
 
-            "<td class=\"infolight\" width=\"112\">"+str_securitylevel+"</td>";
+            "<td class=\"infodark\" width=\"200\"> &nbsp;<a href=\"/api/personnelregistry/"+str_employeecode+"\">"+str_name+"</a></td>"+
+
+            "<td class=\"infolight\" width=\"120\">"+str_signatureDate+" </td>"+
+            "<td class=\"infolight\" width=\"120\">"+str_rank+"</td>"+
+
+            "<td class=\"infolight\" width=\"100\">"+str_securitylevel+"</td>";
 
               if(req.session.loggedin)
 
                 {
-            htmloutput += "<td style=\"text-align:center;\"><a href=\"http://localhost:3000/api/editemployee/"+id+"\" style=\"color:#000000;\"><i class=\"fa-solid fa-pen\"></i></a></td>\n"+
-            "<td><a href=\"http://localhost:3000/api/deleteemployee/"+id+"\" style=\"color:#336699;\">D</a></td></td>";
+            htmloutput += "<td style=\"text-align:center;\"><a href=\"/api/editemployee/"+id+"\" class=\"icon_edit\" title=\"Edit\">&#9998;</a></td>\n"+
+            "<td style=\"text-align:center;\"><a href=\"/api/deleteemployee/"+id+"\" class=\"icon_delete\" title=\"Delete\">&#10005;</a></td>";
 }
   htmloutput += "</tr>";
 			}
@@ -147,22 +143,22 @@ htmloutput += '' +
 					str_rank = employees[i]['rank'];
 					str_securitylevel = employees[i]['securitylevel'] || employees[i]['securitylevel'];
 
-					 htmloutput += 
+					 htmloutput +=
          "<tr>"+
-            "<td class=\"infolight\" width=\"130\">"+str_employeecode+"</td>"+
-            
-            "<td class=\"infodark\" width=\"210\"> &nbsp;<a href=\"http://localhost:3000/api/personnelregistry/"+str_employeecode+"\">"+str_name+"</a></td>"+
-            
-            "<td class=\"infolight\" width=\"130\">"+str_signatureDate+" </td>"+
-            "<td class=\"infolight\" width=\"130\">"+str_rank+"</td>"+
+            "<td class=\"infolight\" width=\"120\">"+str_employeecode+"</td>"+
 
-            "<td class=\"infolight\" width=\"112\">"+str_securitylevel+"</td>";
+            "<td class=\"infodark\" width=\"200\"> &nbsp;<a href=\"/api/personnelregistry/"+str_employeecode+"\">"+str_name+"</a></td>"+
+
+            "<td class=\"infolight\" width=\"120\">"+str_signatureDate+" </td>"+
+            "<td class=\"infolight\" width=\"120\">"+str_rank+"</td>"+
+
+            "<td class=\"infolight\" width=\"100\">"+str_securitylevel+"</td>";
 
              if(req.session.loggedin)
 
                 {
-            htmloutput += "<td class=\"infolight\" width=\"112\">E</td>\n"+
-            "<td class=\"infolight\" width=\"112\">D</td>\n";
+            htmloutput += "<td style=\"text-align:center;\"><a href=\"/api/editemployee/"+id+"\" class=\"icon_edit\" title=\"Edit\">&#9998;</a></td>\n"+
+            "<td style=\"text-align:center;\"><a href=\"/api/deleteemployee/"+id+"\" class=\"icon_delete\" title=\"Delete\">&#10005;</a></td>\n";
 }
 
    htmloutput += "</tr>";
@@ -177,7 +173,11 @@ htmloutput += '' +
 	htmloutput += "</table>";
     res.write(htmloutput);
 	  // skriv ut masterframe nedre delen
-    res.write(htmlinfostop);
+    if(req.session.loggedin){
+        res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+    } else {
+        res.write(htmlinfostop);
+    }
     res.write(htmlbottom);
     res.end();
 
@@ -206,10 +206,6 @@ router.get('/:employeeid', (req, res) =>
     res.write(htmlhead);
     if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
     if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-    //if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-      if(req.session.loggedin){
-        res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
-    }
     res.write(htmlheader);
     res.write(htmlmenu);
     res.write(htmlinfostart);
@@ -219,15 +215,15 @@ router.get('/:employeeid', (req, res) =>
      let result;
      try {
       result = await connection.query(`
-SELECT 
-  employeecode,
+SELECT
+  employeeCode AS employeecode,
   [name],
-  signaturedate,
+  signatureDate AS signaturedate,
   [rank],
-  securitylevel,
-  dateofbirth,
+  securityAccessLevel AS securitylevel,
+  dateOfBirth AS dateofbirth,
   sex,
-  bloodtype,
+  bloodType AS bloodtype,
   height,
   weight,
   department,
@@ -235,7 +231,7 @@ SELECT
   strengths,
   weaknesses
 FROM employee
-WHERE employeecode='${employeeid}'
+WHERE employeeCode='${employeeid}'
 `);
      } catch (queryErr) {
          console.error('ADODB query failed for individual employee:', queryErr && queryErr.process && queryErr.process.message ? queryErr.process.message : queryErr);
@@ -310,8 +306,9 @@ if (result && result.length > 0) {
 
      // Skapa HTML-textsträng för tabellen för utskrift av XML-data
         let htmlOutput =""+
-        "<link rel=\"stylesheet\" href=\"css/personnel_registry.css\" \/>\n"+ 
+        "<link rel=\"stylesheet\" href=\"css/personnel_registry.css\" \/>\n"+
         "<h1>Personnel Registry - " + employeeid + "</h1>\n"+
+        "<div class=\"page-container\">\n"+
         "<table id=\"infomiddle\">\n"+
         "<tr><td width=\"166\" valign=\"top\">\n"+
              "<table id=\"photocol\"><tr><td id=\"photobox\"><img src=\"photos/" + str_employeecode + ".jpg\" alt=\"" + str_employeecode + "\" width=\"164\" /></td></tr><tr><td class=\"tablespacer\"></tr>\n"+
@@ -349,11 +346,16 @@ if (result && result.length > 0) {
         "<h1>Strengths</h1>\n"+ str_strengths +
         "<p />"+
         "<h1>Weaknesses</h1>\n"+ str_weaknesses +
-        "<p />";
+        "<p />" +
+        "</div>\n";
 
         res.write(htmlOutput);
     // skriv ut masterframe nedre delen
-    res.write(htmlinfostop);
+    if(req.session.loggedin){
+        res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+    } else {
+        res.write(htmlinfostop);
+    }
     res.write(htmlbottom);
     res.end();
 	}

@@ -1,5 +1,53 @@
 
-</div>
-<!-- Info-tabell slut -->
+	</article>
 
-<!------------------------- Info slut ------------------------------>
+	<!---- Right sidebar Start ----------------------------------------------------------->
+	<aside>
+		<form name="loginform" action="/api/login" onSubmit="return loginFormCheck()" method="get">
+		    Employee Code: <input type="text" name="femployeecode" size="7" maxlength="7" />
+		    <p />
+		    Password: <input type="password" name="fpassword" size="7" maxlength="7" />
+		    <p />
+		    <input type="submit" class="button" value="Login" /><input class="button" type="reset" value="Reset" />
+		    <p />
+		</form>
+		<nav id="rightnav">
+			<ul class="rightmenu">
+			 <li class="rightitem"><a href="/api/virus">Research Database</a></li>
+			 <li class="rightitem"><a href="/api/userdatabase">User Database</a></li>
+			 <li class="rightitem"><a href="/api/livestream">Virus Livestream</a></li>
+			</ul>
+		</nav>
+	</aside>
+	<!---- Right sidebar End ----------------------------------------------------------->
+
+</main>
+<!---- Info End ----------------------------------------------------------->
+
+<!---- Footer Start ----------------------------------------------------------->
+<footer>
+   <section id="footercontainer">
+	<section class="footersection">
+		<img src="images/Tricell_logo_BW.png" width="150" />
+	</section>
+	<section class="footersection">
+		<b>Tricell Laboratories HR:</b>
+                <br />
+		Room 1102-1103,<br />
+		Hangseng Mongkok Building,<br />
+		677 Nathan Road,<br />
+		Mongkok,<br />
+		Kowloon Hong Kong <br />
+	</section>
+	<section class="footersection">
+		<img src="images/phone.png" width="50" /><br /><p />
+		<h3><b>Emergency Hotline:</b><br />
+		555-456 68768</h3>
+	</section>
+	<section class="footersection">
+		<img src="images/biohazard.png" width="150" />
+	</section>
+    </section>
+</footer>
+<!---- Footer End ----------------------------------------------------------->
+

@@ -12,7 +12,7 @@ router.use(express.static('public'));
 
 const pug = require('pug');
 const {response} = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 const pug_editemployee = pug.compileFile('./html/editemployee.html');
 
 
@@ -60,14 +60,11 @@ router.get('/:id', (req, res) =>
     res.write(htmlheader);
     if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
     if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-    //if(req.session.loggedin){var htmlLoggedinMenu = readHTML('./html/loggedinmenu.html'); res.write(htmlLoggedinMenu); }
-      if(req.session.loggedin){
-        res.write(pug_loggedinmenu({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
-    }
     res.write(htmlmenu);
     res.write(htmlinfostart);
 
-  
+
+    res.write('<div class="page-container">');
     res.write(pug_editemployee({
       id: id,
       employeecode: str_employeecode,
@@ -85,8 +82,13 @@ router.get('/:id', (req, res) =>
       strengths: str_strengths,
       weaknesses: str_weaknesses
     }));
+    res.write('</div>');
 
-    res.write(htmlinfostop);
+    if(req.session.loggedin){
+        res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+    } else {
+        res.write(htmlinfostop);
+    }
     res.write(htmlbottom);
 
     res.end();
@@ -136,13 +138,6 @@ router.post('/', function(request, response)
         {
             response.write(htmlLoggedinMenuCSS);
             response.write(htmlLoggedinMenuJS);
-            //response.write(htmlLoggedinMenu);
-            response.write(pug_loggedinmenu({
-                employeecode: request.cookies.employeecode,
-                name: request.cookies.name,
-                logintimes: request.cookies.logintimes,
-                lastlogin: request.cookies.lastlogin,
-              }));
         }
         response.write(htmlHeader);
         response.write(htmlMenu);
@@ -160,8 +155,12 @@ router.post('/', function(request, response)
             response.write("Not logged in");
         }
 
-        response.write(htmlInfoStop);
-        
+        if(request.session.loggedin){
+            response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+        } else {
+            response.write(htmlInfoStop);
+        }
+
         response.write(htmlBottom);
         response.end();
     }

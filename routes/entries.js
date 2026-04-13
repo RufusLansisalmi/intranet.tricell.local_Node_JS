@@ -6,8 +6,8 @@ const connection2 = ADODB.open('Provider=Microsoft.Jet.OLEDB.4.0;Data Source=./d
 router.post('/:id', (request, response) =>
 {
     const id = request.params.id;
-    const entryHeading = request.body.entryHeading; 
     const entryText = request.body.entryText;
+    const entryHeading = request.body.entryHeading || '';
     const employeeid = request.session.username;
 
     const validAccessLevels = ["B", "A"];
@@ -83,10 +83,7 @@ router.get('/:id', (request, response) =>
                 
                 entryOutput += "<table class=\"entryTable\" cellspacing=\"0\" cellpadding=\"0\">" +
                                     "<tr>"+
-                                        "<td style=\"width: 100%;\">"+entryWriter+" ("+writerName+") | "+entryDate+" | Kl "+entryTime+"</td><td rowspan=\"2\" style=\"text-align: right; vertical-align: bottom;\"><div class=\"deleteButton\" onClick=\"deleteEntry('"+entryId+"')\">D</div></td>"+
-                                    "</tr>"+
-                                    "<tr>"+
-                                        "<td class=\"entryHeading\">"+entryHeading+"</td>"+
+                                        "<td style=\"width: 100%;\">"+entryWriter+" "+writerName+" | "+entryDate+" | kl."+entryTime+"</td><td style=\"text-align:right;vertical-align:middle;\"><div style=\"display:flex;align-items:center;justify-content:flex-end;gap:4px;\"><span>Delete</span><a class=\"icon_delete\" onClick=\"deleteEntry('"+entryId+"')\" style=\"cursor:pointer;\" title=\"Delete\">&#10005;</a></div></td>"+
                                     "</tr>"+
                                     "<tr>"+
                                         "<td class=\"entryBox\" colspan=\"2\">"+entryText+"</td>"+

@@ -3,12 +3,13 @@ const router = express.Router();
 var cookieParser = require('cookie-parser');
 router.use(cookieParser());
 const ADODB = require('node-adodb');
+const crypto = require('crypto');
 var fs = require('fs');
 const path = require('path');
 const readHTML = require('../readHTML');
 router.use(express.static('public'));
 const pug = require('pug');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 
 var htmlhead = readHTML('html/head.html');
 var htmlheader = readHTML('html/header.html');
@@ -38,7 +39,8 @@ router.get('/', (req, res) => {
                 req.session.securityAccessLevel = result3[0]['securityAccessLevel'];
 
                 if (str_lockout == null) {
-                    if (str_passwd == passwd) {
+                    const hashedPasswd = crypto.createHash('md5').update(passwd).digest('hex');
+                    if (str_passwd == hashedPasswd) {
                         req.session.loggedin = true;
                         req.session.username = employeeid;
                         int_logintimes = parseInt(str_logintimes) + 1;
@@ -81,16 +83,12 @@ router.get('/', (req, res) => {
 });
 
 router.get('/:successful', (req, res) => {
-    res.setHeader('Content-type', 'text/html');
     res.write(htmlhead);
     res.write(htmlheader);
     res.write(htmlmenu);
     res.write(htmlinfostart);
-    if (req.session.loggedin) { var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
-    if (req.session.loggedin) { var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
-    if (req.session.loggedin) {
-        res.write(pug_loggedinmenu({ employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel }));
-    }
+    if(req.session.loggedin){var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html'); res.write(htmlLoggedinMenuCSS); }
+    if(req.session.loggedin){var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html'); res.write(htmlLoggedinMenuJS); }
     if (req.session.loggedin) {
         res.write("Login successful<br /><p />");
     } else {
@@ -113,7 +111,11 @@ router.get('/:successful', (req, res) => {
     const updateLog = logConnection.execute("INSERT INTO [Log] (EmployeeCode, [Name], [Date], [Time], Activity) VALUES ('" + req.cookies.employeecode + "', '" + req.cookies.name + "', '" + loginDate + "', '" + timeOfLogin + "', 'Login')");
    
    
-    res.write(htmlinfostop);
+    if(req.session.loggedin){
+        res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+    } else {
+        res.write(htmlinfostop);
+    }
     res.write(htmlbottom);
     res.end();
 });

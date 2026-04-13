@@ -3,7 +3,7 @@ const router = express.Router();
 const ADODB = require('node-adodb');
 const pug = require('pug');
 const {response} = require('express');
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 const pug_editvirus = pug.compileFile('./html/editvirus.html');
 const {getVirusImagesHTML} = require('./virusimages.js');
 const {getAttachmentsHTML} = require('./fileuploadvirus.js');
@@ -17,7 +17,6 @@ var htmlinfostop = readHTML('html/infostop.html');
 var htmlbottom = readHTML('html/bottom.html');
 var htmlLoggedinMenuCSS = readHTML('./html/loggedinmenu_css.html');
 var htmlLoggedinMenuJS = readHTML('./html/loggedinmenu_js.html');
-var loggedinMenu = readHTML('./html/loggedinmenu.html');
 var htmlVirusimagesCSS = readHTML('./html/virusimages_css.html');
 
 router.get('/:id', (req,res)=>{
@@ -38,11 +37,14 @@ let v = result[0];
 
 res.write(htmlhead);
 res.write(htmlheader);
+res.write(htmlLoggedinMenuCSS);
+res.write(htmlLoggedinMenuJS);
 res.write(htmlmenu);
 res.write(htmlVirusimagesCSS);
 res.write(htmlinfostart);
 
 let html = `
+<div class="page-container">
 <h2>Edit Research Object</h2>
 
 <form method="POST">
@@ -77,6 +79,7 @@ Security Handling Video (URL):<br>
 <input type="submit" value="Save">
 
 </form>
+</div>
 `;
 
 res.write(html);
@@ -99,7 +102,11 @@ res.write(pug_editvirus({
 res.write(getVirusImagesHTML(id));
 res.write(getAttachmentsHTML(id));
 
-res.write(htmlinfostop);
+if(req.session.loggedin){
+    res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+} else {
+    res.write(htmlinfostop);
+}
 res.write(htmlbottom);
 res.end();
 

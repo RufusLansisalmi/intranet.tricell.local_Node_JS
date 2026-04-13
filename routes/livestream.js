@@ -4,6 +4,12 @@ const fs = require('fs');
 const path = require('path');
 const readHTML = require('../readHTML.js');
 
+var cookieParser = require('cookie-parser');
+router.use(cookieParser());
+
+const pug = require('pug');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
+
 // Hjälpfunktion för att hämta XML-värden
 function getXmlValue(content, tag) {
     try {
@@ -53,6 +59,8 @@ router.get('/', (request, response) => {
     // Skicka HTML-delar
     response.write(readHTML('./html/head.html'));
     response.write(readHTML('./html/header.html'));
+    if(request.session && request.session.loggedin){response.write(readHTML('./html/loggedinmenu_css.html')); }
+    if(request.session && request.session.loggedin){response.write(readHTML('./html/loggedinmenu_js.html')); }
     response.write(readHTML('./html/menu_back.html'));
     response.write(readHTML('./html/infostart.html'));
 
@@ -75,45 +83,45 @@ router.get('/', (request, response) => {
     <div class="grid-container">
         <div class="monitor-box">
             <img src="/images/screen.png" class="monitor-overlay" onerror="this.style.display='none'">
-            <img id="img_v" class="glitch-img" src="/t-veronica/images/t-veronica.jpg">
+            <img id="img_v" class="glitch-img" src="/t-veronica/images/t-veronica.jpg" onerror="this.dataset.failed='true'; this.outerHTML='<div style=\\'color:#0f0;font-family:monospace;text-align:center;padding-top:100px;font-size:14px;\\'>NO FEED</div>'">
         </div>
         <div class="data-box">
             <b>OBJECT: TCL#3 (T-Veronica)</b><br><br>
-            <span class="label">Temperature (<12 C):</span> 
+            <span class="label">Temperature (<12 C):</span>
             <div id="v_temp" class="blue-info ${Number(bioData.V.temp) > 12 ? 'alarm' : ''}">${bioData.V.temp} C</div>
-            <span class="label">Humidity (<20%):</span> 
+            <span class="label">Humidity (<20%):</span>
             <div id="v_hum" class="blue-info ${Number(bioData.V.hum) > 20 ? 'alarm' : ''}">${bioData.V.hum} %</div>
-            <span class="label">Light (<150 Lm):</span> 
+            <span class="label">Light (<150 Lm):</span>
             <div id="v_light" class="blue-info ${Number(bioData.V.light) > 150 ? 'alarm' : ''}">${bioData.V.light} Lm</div>
         </div>
         <div class="spacer"></div>
 
         <div class="monitor-box">
             <img src="/images/screen.png" class="monitor-overlay" onerror="this.style.display='none'">
-            <img id="img_t" class="glitch-img" src="/tyrant/images/tyrant.jpg">
+            <img id="img_t" class="glitch-img" src="/tyrant/images/tyrant.jpg" onerror="this.dataset.failed='true'; this.outerHTML='<div style=\\'color:#0f0;font-family:monospace;text-align:center;padding-top:100px;font-size:14px;\\'>NO FEED</div>'">
         </div>
         <div class="data-box">
             <b>OBJECT: TCL#2 (Tyrant)</b><br><br>
-            <span class="label">Temperature (<15 C):</span> 
+            <span class="label">Temperature (<15 C):</span>
             <div id="t_temp" class="blue-info ${Number(bioData.T.temp) > 15 ? 'alarm' : ''}">${bioData.T.temp} C</div>
-            <span class="label">Humidity (<20%):</span> 
+            <span class="label">Humidity (<20%):</span>
             <div id="t_hum" class="blue-info ${Number(bioData.T.hum) > 20 ? 'alarm' : ''}">${bioData.T.hum} %</div>
-            <span class="label">Light (<10 Lm):</span> 
+            <span class="label">Light (<10 Lm):</span>
             <div id="t_light" class="blue-info ${Number(bioData.T.light) > 10 ? 'alarm' : ''}">${bioData.T.light} Lm</div>
         </div>
         <div class="spacer"></div>
 
         <div class="monitor-box">
             <img src="/images/screen.png" class="monitor-overlay" onerror="this.style.display='none'">
-            <img id="img_u" class="glitch-img" src="/uroboros/images/uroboros.jpg">
+            <img id="img_u" class="glitch-img" src="/uroboros/images/uroboros.jpg" onerror="this.dataset.failed='true'; this.outerHTML='<div style=\\'color:#0f0;font-family:monospace;text-align:center;padding-top:100px;font-size:14px;\\'>NO FEED</div>'">
         </div>
         <div class="data-box">
             <b>OBJECT: TCL#4 (Uroboros)</b><br><br>
-            <span class="label">Temperature (<10 C):</span> 
+            <span class="label">Temperature (<10 C):</span>
             <div id="u_temp" class="blue-info ${Number(bioData.U.temp) > 10 ? 'alarm' : ''}">${bioData.U.temp} C</div>
-            <span class="label">Humidity (<20%):</span> 
+            <span class="label">Humidity (<20%):</span>
             <div id="u_hum" class="blue-info ${Number(bioData.U.hum) > 20 ? 'alarm' : ''}">${bioData.U.hum} %</div>
-            <span class="label">Light (<210 Lm):</span> 
+            <span class="label">Light (<210 Lm):</span>
             <div id="u_light" class="blue-info ${Number(bioData.U.light) > 210 ? 'alarm' : ''}">${bioData.U.light} Lm</div>
         </div>
     </div>
@@ -126,9 +134,12 @@ router.get('/', (request, response) => {
 
         function updateImages() {
             const t = new Date().getTime();
-            if(document.getElementById("img_v")) document.getElementById("img_v").src = "/t-veronica/images/t-veronica.jpg?t=" + t;
-            if(document.getElementById("img_t")) document.getElementById("img_t").src = "/tyrant/images/tyrant.jpg?t=" + t;
-            if(document.getElementById("img_u")) document.getElementById("img_u").src = "/uroboros/images/uroboros.jpg?t=" + t;
+            ['img_v', 'img_t', 'img_u'].forEach(function(id) {
+                var el = document.getElementById(id);
+                if (el && !el.dataset.failed) {
+                    el.src = el.src.split('?')[0] + '?t=' + t;
+                }
+            });
         }
 
         async function updateData() {
@@ -172,7 +183,11 @@ router.get('/', (request, response) => {
     `;
 
     response.write(htmloutput);
-    response.write(readHTML('./html/infostop.html'));
+    if(request.session && request.session.loggedin){
+        response.write(pug_loggedinmenu_aside({employeecode: request.cookies.employeecode, name: request.cookies.name, lastlogin: request.cookies.lastlogin, logintimes: request.cookies.logintimes, securityAccessLevel: request.session.securityAccessLevel}));
+    } else {
+        response.write(readHTML('./html/infostop.html'));
+    }
     response.write(readHTML('./html/bottom.html'));
     response.end();
 });

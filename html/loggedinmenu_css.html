@@ -1,21 +1,16 @@
 <style type="text/css">
     #loggedinMenuLayer
     {
-        position: fixed;
-        top: 0%;
-        left: 880px;
-        z-index: 11;
-        background-color: #dae3f3;
-        width: 150px;
-            height: 100%;
+        background-color: #e8f0de;
+        width: 180px;
         padding: 10px;
-        border: #000000 1px dashed;
-        display: block;
+        border: #385723 1px solid;
+        margin-top: 10px;
     }
     #userinfo
     {
-        border: #000000 1px solid;
-        background-color: #e2f0d9;
+        border: #385723 1px solid;
+        background-color: #d6e8c4;
         padding: 5px;
         font-family : Arial, Verdana, Geneva, Helvetica, sans-serif;
         font-size: 10px;
@@ -23,8 +18,8 @@
     }
     #chatbutton
     {
-        border: #000000 1px solid;
-        background-color: #336699;
+        border: #385723 1px solid;
+        background-color: #385723;
         padding: 5px;
         margin-top: 10px;
         font-family : Arial, Verdana, Geneva, Helvetica, sans-serif;
@@ -32,12 +27,17 @@
         font-weight: bold;
         text-align: center;
         color: #ffffff;
+        cursor: pointer;
+    }
+    #chatbutton:hover
+    {
+        background-color: #7aa65d;
     }
     #topsecret
     {
         margin-top: 10px;
         margin-bottom: 10px;
-        width: 150px;
+        width: 100%;
         font-family : Arial, Verdana, Geneva, Helvetica, sans-serif;
         font-size: 13px;
         text-align: center;
@@ -45,12 +45,21 @@
     }
     .loggedinbutton
     {
-        padding: 10px;
+        padding: 8px 5px;
         font-family : Arial, Verdana, Geneva, Helvetica, sans-serif;
-        font-size: 12px;
+        font-size: 11px;
         font-weight: bold;
         text-align: left;
-        color: #336699;
+        border-bottom: 1px solid #7aa65d;
+    }
+    .loggedinbutton a
+    {
+        color: #385723 !important;
+        text-decoration: none;
+    }
+    .loggedinbutton a:hover
+    {
+        color: #7aa65d !important;
     }
     #chatLayer
     {
@@ -58,31 +67,31 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        z-index: 12;
-        background-color: #cccccc;
+        z-index: 200;
+        background-color: #e8f0de;
         width: 300px;
         padding: 10px;
-        border: 1px solid black;
+        border: 1px solid #385723;
         display: none;
     }
     #chatLayerTitle
     {
-        background-color: #336699;
+        background-color: #385723;
         color: #ffffff;
         font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
         font-size: 12px;
         font-weight: bold;
         padding: 5px;
         margin-bottom: 6px;
-        border: 1px solid black;
+        border: 1px solid #385723;
     }
     #chatLayerMessages
     {
         height: 180px;
         overflow-y: auto;
-        border: 1px solid black;
+        border: 1px solid #385723;
         padding: 5px;
-        background-color: #eeeeee;
+        background-color: #ffffff;
         font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
         font-size: 11px;
         margin-bottom: 6px;
@@ -93,17 +102,17 @@
         box-sizing: border-box;
         padding: 5px;
         margin-bottom: 4px;
-        border: 1px solid black;
-        background-color: #eeeeee;
+        border: 1px solid #385723;
+        background-color: #ffffff;
         font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
         font-size: 12px;
     }
     #chatSendButton
     {
         width: 100%;
-        background-color: #999999;
-        color: #000000;
-        border: 1px solid black;
+        background-color: #385723;
+        color: #ffffff;
+        border: 1px solid #385723;
         padding: 5px;
         cursor: pointer;
         font-family: Arial, Verdana, Geneva, Helvetica, sans-serif;
@@ -112,7 +121,7 @@
     }
     #chatSendButton:hover
     {
-        background-color: #888888;
+        background-color: #7aa65d;
     }
     #calcLayer
     {
@@ -120,39 +129,45 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        z-index: 12;
-        background-color: #cccccc;
+        z-index: 200;
+        background-color: #e8f0de;
         width: 150px;
         padding: 10px;
+        border: 1px solid #385723;
         display: none;
     }
     #calculator
     {
         border-collapse: collapse;
-        border: 1px solid black;
-        border-spacing: 0px; 
-        background-color: #cccccc;
+        border: 1px solid #385723;
+        border-spacing: 0px;
+        background-color: #e8f0de;
     }
     .calcbutton
     {
         border-collapse: collapse;
-        border: 1px solid black;
-        border-spacing: 0px; 
+        border: 1px solid #385723;
+        border-spacing: 0px;
         padding: 5px;
-        background-color: #999999;
+        background-color: #7aa65d;
+        color: #ffffff;
         font-family : Arial, Verdana, Geneva, Helvetica, sans-serif;
         font-size: 12px;
-        color: #000000;
         width: 30px;
         height: 30px;
+        cursor: pointer;
+    }
+    .calcbutton:hover
+    {
+        background-color: #385723;
     }
     .calcdisplay
     {
         border-collapse: collapse;
-        border: 1px solid black;
-        border-spacing: 0px; 
+        border: 1px solid #385723;
+        border-spacing: 0px;
         padding: 5px;
-        background-color: #eeeeee;
+        background-color: #ffffff;
         font-family : Arial, Verdana, Geneva, Helvetica, sans-serif;
         font-size: 12px;
         color: #000000;
@@ -171,7 +186,7 @@
         top: 50%;
         left: 50%;
         transform: translate(-50%, -50%);
-        z-index: 30;
+        z-index: 200;
         background-color: #f2dede;
         width: 300px;
         padding: 15px;
@@ -205,4 +220,3 @@
         color: #990000;
     }
     </style>
-    

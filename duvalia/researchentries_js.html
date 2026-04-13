@@ -11,7 +11,7 @@ function submitEntry()
     if(document.entryForm.newEntry.value != "" && document.entryForm.entryHeadingInput.value != "")
     {
         var http = new XMLHttpRequest();
-        http.open("POST", "http://localhost:3000/api/entries/"+id+"", true);
+        http.open("POST", "/api/entries/"+id+"", true);
         http.setRequestHeader("Content-Type","application/x-www-form-urlencoded");
         var params = "entryHeading=" + document.getElementById('entryHeadingInput').value +"&entryText=" + document.getElementById('newEntry').value;
         http.send(params);
@@ -34,7 +34,7 @@ function submitEntry()
 function deleteEntry(id)
 {
     var http = new XMLHttpRequest();
-    http.open("DELETE", "http://localhost:3000/api/entries/"+id+"", true);
+    http.open("DELETE", "/api/entries/"+id+"", true);
     http.onload = function()
     {
         refreshEntry();
@@ -56,7 +56,7 @@ function deleteEntry(id)
         {
             document.getElementById("pastEntryBox").innerHTML = this.responseText;
         }
-        xhttp.open("GET","http://localhost:3000/api/entries/"+id+"",true);
+        xhttp.open("GET","/api/entries/"+id+"",true);
         xhttp.send();
         
         

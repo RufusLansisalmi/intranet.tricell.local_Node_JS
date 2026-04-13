@@ -84,7 +84,7 @@ htmloutput += "<h2>Research Database:</h2>";
 
 htmloutput += "</td><td width=\"350\" align=\"right\">";
 
-htmloutput += "<a href=\"http://localhost:3000/api/newvirus\" style=\"color:#336699;text-decoration:none;\">Add New Research Object</a>";
+htmloutput += "<a href=\"/api/newvirus\" style=\"color:#336699;text-decoration:none;\">Add New Research Object</a>";
 
 htmloutput += "</td></tr></table>";
 
@@ -163,8 +163,8 @@ if(req.session.loggedin)
 {
 
 htmloutput +=
-"<td style=\"text-align:center;\"><a href=\"http://localhost:3000/api/editvirus/"+id+"\" style=\"color:#000000;\"><i class=\"fa-solid fa-pen\"></i></a></td>"+
-"<td><a href=\"http://localhost:3000/api/deletevirus/"+id+"\" style=\"color:#336699;\">D</a></td>";
+"<td style=\"text-align:center;\"><a href=\"/api/editvirus/"+id+"\" style=\"color:#000000;\"><i class=\"fa-solid fa-pen\"></i></a></td>"+
+"<td><a href=\"/api/deletevirus/"+id+"\" style=\"color:#336699;\">D</a></td>";
 
 }
 

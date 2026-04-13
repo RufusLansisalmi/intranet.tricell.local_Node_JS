@@ -6,7 +6,7 @@ const readHTML = require('../readHTML.js');
 
 router.use(express.urlencoded({ extended: false }));
 
-const pug_loggedinmenu = pug.compileFile('./html/loggedinmenu.html');
+const pug_loggedinmenu_aside = pug.compileFile('./html/loggedinmenu_aside.html');
 
 var htmlhead     = readHTML('./html/head.html');
 var htmlheader   = readHTML('./html/header.html');
@@ -21,13 +21,6 @@ function writeFrame(req, res) {
     if (req.session.loggedin) {
         res.write(readHTML('./html/loggedinmenu_css.html'));
         res.write(readHTML('./html/loggedinmenu_js.html'));
-        res.write(pug_loggedinmenu({
-            employeecode: req.cookies.employeecode,
-            name: req.cookies.name,
-            lastlogin: req.cookies.lastlogin,
-            logintimes: req.cookies.logintimes,
-            securityAccessLevel: req.session.securityAccessLevel
-        }));
     }
     res.write(htmlmenu);
     res.write(htmlinfostart);
@@ -39,7 +32,11 @@ router.get('/', async (req, res) => {
         res.writeHead(200, { 'Content-Type': 'text/html' });
         writeFrame(req, res);
         res.write('<h2>You are not authorised to access this.</h2>');
-        res.write(htmlinfostop);
+        if(req.session.loggedin){
+            res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+        } else {
+            res.write(htmlinfostop);
+        }
         res.write(htmlbottom);
         return res.end();
     }
@@ -69,7 +66,7 @@ router.get('/', async (req, res) => {
         let html = '<link rel="stylesheet" href="css/personnel_registry.css" />';
 
         // ---- User list table ----
-        html += '<h2>User Database <a href="javascript:void(0)" onclick="document.getElementById(\'addForm\').style.display=document.getElementById(\'addForm\').style.display===\'none\'?\'block\':\'none\'" style="font-size:14px;color:#336699;text-decoration:none;">[+] Add New User</a></h2>';
+        html += '<h2>User Database <a href="javascript:void(0)" onclick="document.getElementById(\'addForm\').style.display=document.getElementById(\'addForm\').style.display===\'none\'?\'block\':\'none\'" class="icon_add" title="Add New User" style="font-size:14px;vertical-align:middle;">&#43;</a> <a href="javascript:void(0)" onclick="document.getElementById(\'addForm\').style.display=document.getElementById(\'addForm\').style.display===\'none\'?\'block\':\'none\'" style="font-size:14px;color:#336699;text-decoration:none;">Add New User</a></h2>';
 
         html += '<table id="personnel">';
         html += '<tr>';
@@ -90,8 +87,8 @@ router.get('/', async (req, res) => {
             html += `<td class="infodark">${u.name || ''}</td>`;
             html += `<td class="infolight">${u.securityAccessLevel || ''}</td>`;
             html += `<td class="infolight">${status}</td>`;
-            html += `<td class="infolight" style="text-align:center;"><a href="/api/userdatabase/edit/${encoded}" style="color:#000;">[E]</a></td>`;
-            html += `<td class="infolight" style="text-align:center;"><a href="/api/userdatabase/delete/${encoded}" style="color:#cc0000;" onclick="return confirm('Delete user ${u.employeeCode}?')">[X]</a></td>`;
+            html += `<td class="infolight" style="text-align:center;"><a href="/api/userdatabase/edit/${encoded}" class="icon_edit" title="Edit">&#9998;</a></td>`;
+            html += `<td class="infolight" style="text-align:center;"><a href="/api/userdatabase/delete/${encoded}" class="icon_delete" title="Delete" onclick="return confirm('Delete user ${u.employeeCode}?')">&#10005;</a></td>`;
             html += '</tr>';
         }
         html += '</table>';
@@ -123,7 +120,11 @@ router.get('/', async (req, res) => {
         html += '</form></div>';
 
         res.write(html);
-        res.write(htmlinfostop);
+        if(req.session.loggedin){
+            res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+        } else {
+            res.write(htmlinfostop);
+        }
         res.write(htmlbottom);
         res.end();
     } catch (err) {
@@ -158,7 +159,11 @@ router.post('/', async (req, res) => {
             writeFrame(req, res);
             res.write('<h2>Error: User already exists. Use Edit to modify an existing user.</h2>');
             res.write('<a href="/api/userdatabase" style="color:#336699;">Back to User Database</a>');
-            res.write(htmlinfostop);
+            if(req.session.loggedin){
+                res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+            } else {
+                res.write(htmlinfostop);
+            }
             res.write(htmlbottom);
             return res.end();
         }
@@ -202,7 +207,11 @@ router.get('/edit/:username', async (req, res) => {
         if (users.length === 0) {
             res.write('<h2>User not found.</h2>');
             res.write('<a href="/api/userdatabase" style="color:#336699;">Back</a>');
-            res.write(htmlinfostop);
+            if(req.session.loggedin){
+                res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+            } else {
+                res.write(htmlinfostop);
+            }
             res.write(htmlbottom);
             return res.end();
         }
@@ -235,7 +244,11 @@ router.get('/edit/:username', async (req, res) => {
         html += '</form>';
 
         res.write(html);
-        res.write(htmlinfostop);
+        if(req.session.loggedin){
+            res.write(pug_loggedinmenu_aside({employeecode: req.cookies.employeecode, name: req.cookies.name, lastlogin: req.cookies.lastlogin, logintimes: req.cookies.logintimes, securityAccessLevel: req.session.securityAccessLevel}));
+        } else {
+            res.write(htmlinfostop);
+        }
         res.write(htmlbottom);
         res.end();
     } catch (err) {

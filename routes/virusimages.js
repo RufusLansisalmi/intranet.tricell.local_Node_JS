@@ -20,7 +20,7 @@ function getVirusImagesHTML(virusId) {
 
     //Skaffa en form för att ladda upp bilder
     html += `
-        <form id="upload-image-form" action="http://localhost:3000/api/editvirusimage/newvirusimage/${virusId}" method="POST" enctype="multipart/form-data" style="display:none;">
+        <form id="upload-image-form" action="/api/editvirusimage/newvirusimage/${virusId}" method="POST" enctype="multipart/form-data" style="display:none;">
             <input type="file" name="virusimage" id="virusimage-input" accept="image/jpeg" onchange="this.form.submit()">
         </form>
     `;
@@ -46,7 +46,7 @@ function getVirusImagesHTML(virusId) {
                          alt="Virus ${virusId} Image ${imageNumber}"
                          style="width:100%; height:120px; object-fit:cover; border:1px solid #ddd; cursor:pointer;"
                          onclick="event.stopPropagation(); var lb = document.getElementById('image-lightbox'); document.getElementById('lightbox-img').src=this.src; lb.style.display='flex';">
-                    <a class="delete-image-btn" href="http://localhost:3000/api/editvirusimage/deletevirusimage/${virusId}/${imageNumber}">
+                    <a class="delete-image-btn" href="/api/editvirusimage/deletevirusimage/${virusId}/${imageNumber}">
                         &#x2715;
                     </a>
                 </div>
