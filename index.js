@@ -3,7 +3,7 @@ const config = require('./config/globals.json');
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-// Test
+
 const app = express();                  /* Skapa webbserver-objektet */
 
 const path = require('path');
@@ -43,6 +43,7 @@ const readHTML = require('./readHTML.js');
     var htmlHeader = readHTML('./masterframe/header.html');
     var htmlMenu = readHTML('./masterframe/menu.html');
     var htmlInfoStart = readHTML('./masterframe/infoStart.html');
+    var rightMenu = readHTML("./masterframe/rightmenu.html")
     var htmlIndex = readHTML('./public/text/index.html');
     var htmlInfoStop = readHTML('./masterframe/infoStop.html');
     var htmlFooter = readHTML('./masterframe/footer.html');
@@ -106,7 +107,8 @@ app.get('/', function(request, response)
     response.write(htmlMenu);
     response.write(htmlInfoStart);
     htmlInfo = readHTML('./public/text/index.html');
-    response.write(htmlInfo);    
+    response.write(htmlInfo);
+    response.write(rightMenu);    
     response.write(htmlInfoStop);
     response.write(htmlFooter);
     response.write(htmlBottom);
