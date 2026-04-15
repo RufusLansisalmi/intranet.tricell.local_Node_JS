@@ -6,6 +6,7 @@
   "scripts": {
     "start": "node index.js",
     "dev": "nodemon index.js",
+    "mac": "SYSTEMROOT=/usr node index.js", // temorärt eftersom node-adodb är ett paket som kopplar till gamla Microsoft Access-databaser (.mdb-filer). Det paketet är byggt enbart för Windows så funkar inte på min mac! Filen node_modules/node-adodb/lib/engine.js rad 15 såg ut såhär: const sysroot = process.env['systemroot'] || process.env['windir']; ändra tillbaka för att det ska fungera på windows igen
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],

@@ -308,3 +308,46 @@ footer h3
 	position: relative;
 	z-index: 50;
 }
+
+@media (max-width: 768px) {
+    /* En media query är ett villkor i CSS som säger: "Om skärmen är smalare än X pixlar, använd dessa regler istället. Så dessa regler gäller bara på smal skärm, */
+
+    /* MAIN - ta bort fast bredd så den fyller hela skärmen */
+    main {
+        width: 100%;
+    }
+
+    /* ARTIKEL - ta bort fast bredd och float så den inte försöker ligga bredvid sidebar */
+    article {
+        width: 100%;
+        float: none;
+    }
+
+    /* SIDEBAR - ta bort fast bredd och float så den hamnar under artikeln */
+    aside {
+        width: 100%;
+        float: none;
+    }
+
+    /* LOGO - ta bort vänstermarginalen som tryckte ut den */
+    #logo {
+        margin-left: 10px;
+    }
+
+    /* FOOTER - ta bort fast bredd */
+    #footercontainer {
+        width: 100%;
+    }
+
+    /* FOOTER-SEKTIONER - stapla dem under varandra istället för bredvid */
+    .footersection {
+        width: 90%;
+        float: none;
+        margin: 5px auto;
+    }
+
+    /* TOPMENY - göm den horisontella menyn på mobil */
+    #topnav {
+        display: none;
+    }
+}
