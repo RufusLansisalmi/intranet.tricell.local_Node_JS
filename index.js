@@ -3,7 +3,7 @@ const config = require('./config/globals.json');
 const express = require('express');
 const session = require('express-session');
 const bodyParser = require('body-parser');
-
+// Test
 const app = express();                  /* Skapa webbserver-objektet */
 
 const path = require('path');
