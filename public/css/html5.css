@@ -346,8 +346,75 @@ footer h3
         margin: 5px auto;
     }
 
-    /* TOPMENY - göm den horisontella menyn på mobil */
+    /* HAMBURGER-MENY - ersätter den horisontella menyn på mobil */
     #topnav {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 30px;
+        height: 30px;
+        z-index: 200;
+        overflow: hidden;
+    }
+
+    /* När man håller musen över topnav expanderar den till hela menyn */
+    #topnav:hover {
+        width: 220px;
+        height: auto;
+        overflow: visible;
+    }
+
+    /* Hamburger-ikonen (☰) */
+    #hamburger {
+        display: block;
+        height: 30px;
+        line-height: 30px;
+        text-align: center;
+        background-color: #000000;
+        color: white;
+        font-size: 20px;
+        cursor: pointer;
+    }
+
+    /* Menylistan gömd tills topnav hover */
+    ul.topmenu {
         display: none;
+        position: static;
+        height: auto;
+        left: auto;
+        transform: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Visa menylistan när topnav hover */
+    #topnav:hover ul.topmenu {
+        display: block;
+    }
+
+    /* Alla topitem staplas vertikalt */
+    li.topitem {
+        display: block;
+        float: none;
+        height: auto;
+        line-height: 30px;
+        padding: 5px 10px;
+    }
+
+    /* Dropdownmeny alltid synlig och i normal flöde (inte absolut) */
+    ul.dropdownmenu {
+        visibility: visible;
+        position: relative;
+        padding: 0;
+        margin: 0;
+    }
+
+    /* Alla dropdown-items alltid synliga och staplade vertikalt */
+    li.dropdownitem {
+        display: block;
+        visibility: visible;
+        height: auto;
+        line-height: 30px;
+        padding: 5px 10px 5px 20px;
     }
 }
